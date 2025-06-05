@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { error } = await supabase.from("questions").insert([{ question, timestamp }]);
 
   if (error) {
-    console.error("Error inserting into Supabase:", error);
+    console.error("Supabase insert error:", error);
     return res.status(500).json({ error: "Failed to log question" });
   }
 
