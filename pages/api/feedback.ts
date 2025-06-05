@@ -1,20 +1,18 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+export const config = {
+  runtime: "edge",
+};
+
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_ANON_KEY!
 );
 
-export const config = {
-  runtime: "edge",
-};
-
 export default async function handler(req: NextRequest) {
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
-      status: 405,
-    });
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
   const { messageIndex, feedback, message, timestamp } = await req.json();
@@ -24,10 +22,7 @@ export default async function handler(req: NextRequest) {
   ]);
 
   if (error) {
-    console.error("Supabase insert error:", error);
-    return new Response(JSON.stringify({ error: "Failed to log feedback" }), {
-      status: 500,
-    });
+    return new Response("Failed to log feedback", { status: 500 });
   }
 
   return new Response(JSON.stringify({ status: "ok" }), { status: 200 });
