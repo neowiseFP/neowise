@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -6,12 +6,18 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY!
 );
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export const config = {
+  runtime: "edge",
+};
+
+export default async function handler(req: NextRequest) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
+      status: 405,
+    });
   }
 
-  const { messageIndex, feedback, message, timestamp } = req.body;
+  const { messageIndex, feedback, message, timestamp } = await req.json();
 
   const { error } = await supabase.from("feedback").insert([
     { message_index: messageIndex, feedback, message, timestamp },
@@ -19,8 +25,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (error) {
     console.error("Supabase insert error:", error);
-    return res.status(500).json({ error: "Failed to log feedback" });
+    return new Response(JSON.stringify({ error: "Failed to log feedback" }), {
+      status: 500,
+    });
   }
 
-  res.status(200).json({ status: "ok" });
+  return new Response(JSON.stringify({ status: "ok" }), { status: 200 });
 }
