@@ -80,7 +80,7 @@ export default function Home() {
     setLoading(false);
 
     if (data.reply) {
-      const assistantReply = { role: "assistant" as const, content: data.reply };ß
+      const assistantReply = { role: "assistant" as const, content: data.reply };
       const updatedMessages = [...newMessages, assistantReply];
       setMessages(updatedMessages);
 
