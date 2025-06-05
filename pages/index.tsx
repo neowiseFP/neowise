@@ -136,7 +136,7 @@ export default function Home() {
         <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
 
         <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-          <div ref={chatRef} className="space-y-4 mb-4 h-[600px] overflow-y-auto border p-3 bg-gray-50 rounded">
+          <div ref={chatRef} className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
                 <span
