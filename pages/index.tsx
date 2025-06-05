@@ -136,59 +136,49 @@ export default function Home() {
         <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
 
         <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-          <div ref={chatRef} className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
+          <div
+            ref={chatRef}
+            className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
+          >
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
                 <span
                   className={`inline-block px-4 py-2 rounded-lg max-w-[85%] whitespace-pre-wrap text-left ${
-                    m.role === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
+                    m.role === "user"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-800"
                   }`}
                 >
                   {m.content}
                 </span>
+
                 {m.role === "assistant" && m.content.length > 99 && (
                   <div className="text-sm mt-1">
-                    <button onClick={() => setFeedback({ ...feedback, [i]: "up" })}>👍</button>
-                    <button onClick={() => setFeedback({ ...feedback, [i]: "neutral" })} className="mx-2">🤔</button>
-                    <button onClick={() => setFeedback({ ...feedback, [i]: "down" })}>👎</button>
+                    <button
+                      onClick={() => setFeedback({ ...feedback, [i]: "up" })}
+                    >
+                      👍
+                    </button>
+                    <button
+                      onClick={() => setFeedback({ ...feedback, [i]: "neutral" })}
+                      className="mx-2"
+                    >
+                      🤔
+                    </button>
+                    <button
+                      onClick={() => setFeedback({ ...feedback, [i]: "down" })}
+                    >
+                      👎
+                    </button>
                   </div>
                 )}
               </div>
             ))}
-            {loading && <div className="text-sm text-gray-500 italic">Neo is thinking...</div>}
+            {loading && (
+              <div className="text-sm text-gray-500 italic">Neo is thinking...</div>
+            )}
           </div>
-
-          {suggested.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2 mb-4">
-              {suggested.map((q, i) => (
-                <button
-                  key={i}
-                  className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                  onClick={() => setInput(q)}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {showCategories && (
-            <div className="flex flex-wrap gap-3 justify-center mb-4">
-              {Object.keys(categories).map((cat, i) => (
-                <button
-                  key={i}
-                  className="border px-4 py-2 rounded text-sm hover:bg-gray-100"
-                  onClick={() => {
-                    setInput("");
-                    setSuggested(categories[cat as keyof typeof categories]);
-                    setShowCategories(false);
-                  }}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          )}
+        </div>
 
           <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
             <input
