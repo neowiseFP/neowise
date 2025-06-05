@@ -10,7 +10,8 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
-      content: "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
+      content:
+        "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -67,7 +68,6 @@ export default function Home() {
     setMessages(newMessages);
     setInput("");
     setLoading(true);
-    setShowCategories(false);
     setSuggested([]);
 
     const res = await fetch("/api/chat", {
@@ -80,6 +80,8 @@ export default function Home() {
     setLoading(false);
 
     if (data.reply) {
+      setShowCategories(false);
+
       const assistantReply = { role: "assistant" as const, content: data.reply };
       const updatedMessages = [...newMessages, assistantReply];
       setMessages(updatedMessages);
@@ -89,7 +91,8 @@ export default function Home() {
           ...prev,
           {
             role: "assistant" as const,
-            content: "Want to keep going on this? Or would you rather jump topics?",
+            content:
+              "Want to keep going on this? Or would you rather jump topics?",
           },
         ]);
       }, 2000);
@@ -123,17 +126,25 @@ export default function Home() {
         ]);
       }
     } else {
-      setMessages([...newMessages, { role: "assistant", content: "Sorry, something went wrong." }]);
+      setMessages([
+        ...newMessages,
+        { role: "assistant", content: "Sorry, something went wrong." },
+      ]);
     }
   };
+
   return (
     <>
       <Head>
         <title>Neo — Your AI Financial Assistant</title>
       </Head>
       <div className="min-h-screen bg-gray-50 p-4 text-gray-900 font-sans">
-        <h1 className="text-center text-2xl font-bold mb-1">Neo — Your AI Financial Assistant</h1>
-        <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
+        <h1 className="text-center text-2xl font-bold mb-1">
+          Neo — Your AI Financial Assistant
+        </h1>
+        <p className="text-center text-gray-600 mb-4">
+          Ask questions. Get answers.
+        </p>
 
         <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
           <div
@@ -141,7 +152,10 @@ export default function Home() {
             className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
           >
             {messages.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
+              <div
+                key={i}
+                className={m.role === "user" ? "text-right" : "text-left"}
+              >
                 <span
                   className={`inline-block px-4 py-2 rounded-lg max-w-[85%] whitespace-pre-wrap text-left ${
                     m.role === "user"
@@ -160,7 +174,9 @@ export default function Home() {
                       👍
                     </button>
                     <button
-                      onClick={() => setFeedback({ ...feedback, [i]: "neutral" })}
+                      onClick={() =>
+                        setFeedback({ ...feedback, [i]: "neutral" })
+                      }
                       className="mx-2"
                     >
                       🤔
@@ -175,10 +191,25 @@ export default function Home() {
               </div>
             ))}
             {loading && (
-              <div className="text-sm text-gray-500 italic">Neo is thinking...</div>
+              <div className="text-sm text-gray-500 italic">
+                Neo is thinking...
+              </div>
+            )}
+
+            {suggested.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2 mb-4">
+                {suggested.map((q, i) => (
+                  <button
+                    key={i}
+                    className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
+                    onClick={() => setInput(q)}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
-        </div>
 
           <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
             <input
@@ -188,46 +219,104 @@ export default function Home() {
               placeholder="Ask me anything..."
               className="flex-1 px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring"
             />
-            <button type="submit" className="bg-black text-white px-4 py-2 rounded">Send</button>
+            <button
+              type="submit"
+              className="bg-black text-white px-4 py-2 rounded"
+            >
+              Send
+            </button>
           </form>
 
+          {showCategories && (
+            <div className="mt-6">
+              {Object.keys(categories).map((cat, i) => (
+                <div key={i} className="mb-4">
+                  <h2 className="font-semibold text-gray-700 mb-2">{cat}</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {categories[cat as keyof typeof categories].map((q, j) => (
+                      <button
+                        key={j}
+                        className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
+                        onClick={() => setInput(q)}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="mt-6 flex justify-center gap-4 flex-wrap">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded shadow" onClick={() => setShowCalculator(true)}>
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded shadow"
+              onClick={() => setShowCalculator(true)}
+            >
               Mortgage Calculator
             </button>
-            <button className="bg-green-600 text-white px-4 py-2 rounded shadow" onClick={() => setShowCFP(true)}>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded shadow"
+              onClick={() => setShowCFP(true)}
+            >
               Talk to a CFP®
             </button>
-            <button className="bg-indigo-600 text-white px-4 py-2 rounded shadow" onClick={() => setShowInvestmentCheck(true)}>
+            <button
+              className="bg-indigo-600 text-white px-4 py-2 rounded shadow"
+              onClick={() => setShowInvestmentCheck(true)}
+            >
               Investment Check
             </button>
           </div>
         </div>
 
         {showCalculator && (
-          <Modal title="Mortgage Calculator" onClose={() => setShowCalculator(false)}>
+          <Modal
+            title="Mortgage Calculator"
+            onClose={() => setShowCalculator(false)}
+          >
             <MortgageCalculator />
           </Modal>
         )}
         {showCFP && (
           <Modal title="Talk to a CFP®" onClose={() => setShowCFP(false)}>
-            <p>This feature is coming soon! You'll be able to connect directly with a human advisor.</p>
+            <p>
+              This feature is coming soon! You'll be able to connect directly
+              with a human advisor.
+            </p>
           </Modal>
         )}
         {showInvestmentCheck && (
-          <Modal title="Investment Check" onClose={() => setShowInvestmentCheck(false)}>
-            <p>Coming soon: Neo will help you assess your portfolio, estimate fees, and ask smarter questions.</p>
+          <Modal
+            title="Investment Check"
+            onClose={() => setShowInvestmentCheck(false)}
+          >
+            <p>
+              Coming soon: Neo will help you assess your portfolio, estimate
+              fees, and ask smarter questions.
+            </p>
           </Modal>
         )}
+      </div>
     </>
   );
 }
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow max-w-md w-full relative">
-        <button className="absolute top-2 right-3 text-xl" onClick={onClose}>×</button>
+        <button className="absolute top-2 right-3 text-xl" onClick={onClose}>
+          ×
+        </button>
         <h2 className="text-lg font-bold mb-4">{title}</h2>
         {children}
       </div>
@@ -246,18 +335,49 @@ function MortgageCalculator() {
     const loan = price - down;
     const r = rate / 100 / 12;
     const n = years * 12;
-    const m = loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    const m = (loan * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
     setMonthly(isFinite(m) ? m.toFixed(2) : "0.00");
   };
 
   return (
     <div className="space-y-3">
-      <input type="number" value={price} onChange={(e) => setPrice(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Home Price" />
-      <input type="number" value={down} onChange={(e) => setDown(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Down Payment" />
-      <input type="number" value={rate} onChange={(e) => setRate(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Interest Rate (%)" />
-      <input type="number" value={years} onChange={(e) => setYears(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Loan Term (years)" />
-      <button onClick={handleCalc} className="w-full bg-blue-600 text-white py-2 rounded">Calculate</button>
-      <div className="text-center font-bold">Estimated Monthly: ${monthly}</div>
+      <input
+        type="number"
+        value={price}
+        onChange={(e) => setPrice(+e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="Home Price"
+      />
+      <input
+        type="number"
+        value={down}
+        onChange={(e) => setDown(+e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="Down Payment"
+      />
+      <input
+        type="number"
+        value={rate}
+        onChange={(e) => setRate(+e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="Interest Rate (%)"
+      />
+      <input
+        type="number"
+        value={years}
+        onChange={(e) => setYears(+e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="Loan Term (years)"
+      />
+      <button
+        onClick={handleCalc}
+        className="w-full bg-blue-600 text-white py-2 rounded"
+      >
+        Calculate
+      </button>
+      <div className="text-center font-bold">
+        Estimated Monthly: ${monthly}
+      </div>
     </div>
   );
 }
