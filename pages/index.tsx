@@ -146,7 +146,6 @@ export default function Home() {
       ]);
     }
   };
-
   return (
     <>
       <Head>
@@ -166,10 +165,7 @@ export default function Home() {
             className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
           >
             {messages.map((m, i) => (
-              <div
-                key={i}
-                className={m.role === "user" ? "text-right" : "text-left"}
-              >
+              <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
                 <span
                   className={`inline-block px-4 py-2 rounded-lg max-w-[85%] whitespace-pre-wrap text-left ${
                     m.role === "user"
@@ -183,20 +179,58 @@ export default function Home() {
                 {m.role === "assistant" && m.content.length > 99 && (
                   <div className="text-sm mt-1">
                     <button
-                      onClick={() => setFeedback({ ...feedback, [i]: "up" })}
+                      onClick={() => {
+                        setFeedback({ ...feedback, [i]: "up" });
+                        fetch("/api/feedback", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            messageIndex: i,
+                            feedback: "up",
+                            message: messages[i]?.content,
+                            timestamp: new Date().toISOString(),
+                          }),
+                        });
+                      }}
+                      className={feedback[i] === "up" ? "text-xl scale-110" : "opacity-50"}
                     >
                       👍
                     </button>
                     <button
-                      onClick={() =>
-                        setFeedback({ ...feedback, [i]: "neutral" })
-                      }
-                      className="mx-2"
+                      onClick={() => {
+                        setFeedback({ ...feedback, [i]: "neutral" });
+                        fetch("/api/feedback", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            messageIndex: i,
+                            feedback: "neutral",
+                            message: messages[i]?.content,
+                            timestamp: new Date().toISOString(),
+                          }),
+                        });
+                      }}
+                      className={`mx-2 ${
+                        feedback[i] === "neutral" ? "text-xl scale-110" : "opacity-50"
+                      }`}
                     >
                       🤔
                     </button>
                     <button
-                      onClick={() => setFeedback({ ...feedback, [i]: "down" })}
+                      onClick={() => {
+                        setFeedback({ ...feedback, [i]: "down" });
+                        fetch("/api/feedback", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            messageIndex: i,
+                            feedback: "down",
+                            message: messages[i]?.content,
+                            timestamp: new Date().toISOString(),
+                          }),
+                        });
+                      }}
+                      className={feedback[i] === "down" ? "text-xl scale-110" : "opacity-50"}
                     >
                       👎
                     </button>
@@ -204,10 +238,9 @@ export default function Home() {
                 )}
               </div>
             ))}
+
             {loading && (
-              <div className="text-sm text-gray-500 italic">
-                Neo is thinking...
-              </div>
+              <div className="text-sm text-gray-500 italic">Neo is thinking...</div>
             )}
 
             {suggested.length > 0 && (
@@ -240,21 +273,17 @@ export default function Home() {
 
             {showCategories && selectedCategory && (
               <div className="mt-6">
-                <h2 className="font-semibold text-gray-700 mb-2">
-                  {selectedCategory}
-                </h2>
+                <h2 className="font-semibold text-gray-700 mb-2">{selectedCategory}</h2>
                 <div className="flex flex-wrap gap-2">
-                  {categories[selectedCategory as keyof typeof categories].map(
-                    (q, j) => (
-                      <button
-                        key={j}
-                        className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                        onClick={() => setInput(q)}
-                      >
-                        {q}
-                      </button>
-                    )
-                  )}
+                  {categories[selectedCategory as keyof typeof categories].map((q, j) => (
+                    <button
+                      key={j}
+                      className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
+                      onClick={() => setInput(q)}
+                    >
+                      {q}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -299,30 +328,18 @@ export default function Home() {
         </div>
 
         {showCalculator && (
-          <Modal
-            title="Mortgage Calculator"
-            onClose={() => setShowCalculator(false)}
-          >
+          <Modal title="Mortgage Calculator" onClose={() => setShowCalculator(false)}>
             <MortgageCalculator />
           </Modal>
         )}
         {showCFP && (
           <Modal title="Talk to a CFP®" onClose={() => setShowCFP(false)}>
-            <p>
-              This feature is coming soon! You'll be able to connect directly
-              with a human advisor.
-            </p>
+            <p>This feature is coming soon! You'll be able to connect directly with a human advisor.</p>
           </Modal>
         )}
         {showInvestmentCheck && (
-          <Modal
-            title="Investment Check"
-            onClose={() => setShowInvestmentCheck(false)}
-          >
-            <p>
-              Coming soon: Neo will help you assess your portfolio, estimate
-              fees, and ask smarter questions.
-            </p>
+          <Modal title="Investment Check" onClose={() => setShowInvestmentCheck(false)}>
+            <p>Coming soon: Neo will help you assess your portfolio, estimate fees, and ask smarter questions.</p>
           </Modal>
         )}
       </div>
@@ -342,9 +359,7 @@ function Modal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow max-w-md w-full relative">
-        <button className="absolute top-2 right-3 text-xl" onClick={onClose}>
-          ×
-        </button>
+        <button className="absolute top-2 right-3 text-xl" onClick={onClose}>×</button>
         <h2 className="text-lg font-bold mb-4">{title}</h2>
         {children}
       </div>
@@ -363,49 +378,18 @@ function MortgageCalculator() {
     const loan = price - down;
     const r = rate / 100 / 12;
     const n = years * 12;
-    const m = (loan * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
+    const m = loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     setMonthly(isFinite(m) ? m.toFixed(2) : "0.00");
   };
 
   return (
     <div className="space-y-3">
-      <input
-        type="number"
-        value={price}
-        onChange={(e) => setPrice(+e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        placeholder="Home Price"
-      />
-      <input
-        type="number"
-        value={down}
-        onChange={(e) => setDown(+e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        placeholder="Down Payment"
-      />
-      <input
-        type="number"
-        value={rate}
-        onChange={(e) => setRate(+e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        placeholder="Interest Rate (%)"
-      />
-      <input
-        type="number"
-        value={years}
-        onChange={(e) => setYears(+e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        placeholder="Loan Term (years)"
-      />
-      <button
-        onClick={handleCalc}
-        className="w-full bg-blue-600 text-white py-2 rounded"
-      >
-        Calculate
-      </button>
-      <div className="text-center font-bold">
-        Estimated Monthly: ${monthly}
-      </div>
+      <input type="number" value={price} onChange={(e) => setPrice(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Home Price" />
+      <input type="number" value={down} onChange={(e) => setDown(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Down Payment" />
+      <input type="number" value={rate} onChange={(e) => setRate(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Interest Rate (%)" />
+      <input type="number" value={years} onChange={(e) => setYears(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Loan Term (years)" />
+      <button onClick={handleCalc} className="w-full bg-blue-600 text-white py-2 rounded">Calculate</button>
+      <div className="text-center font-bold">Estimated Monthly: ${monthly}</div>
     </div>
   );
 }
