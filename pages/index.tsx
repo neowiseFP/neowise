@@ -219,7 +219,6 @@ export default function Home() {
             <p>Coming soon: Neo will help you assess your portfolio, estimate fees, and ask smarter questions.</p>
           </Modal>
         )}
-      </div>
     </>
   );
 }
