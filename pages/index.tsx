@@ -75,6 +75,15 @@ export default function Home() {
     setLoading(true);
     setSuggested([]);
 
+    fetch("/api/log-question", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: input.trim(),
+        timestamp: new Date().toISOString(),
+      }),
+    });
+
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
