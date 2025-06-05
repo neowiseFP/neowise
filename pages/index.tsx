@@ -180,7 +180,7 @@ export default function Home() {
                   className="border px-4 py-2 rounded text-sm hover:bg-gray-100"
                   onClick={() => {
                     setInput("");
-                    setSuggested(categories[cat]);
+                    setSuggested(categories[cat as keyof typeof categories]);
                     setShowCategories(false);
                   }}
                 >
