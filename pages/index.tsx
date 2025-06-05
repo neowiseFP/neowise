@@ -88,9 +88,9 @@ export default function Home() {
         setMessages((prev) => [
           ...prev,
           {
-            role: "assistant",
+            role: "assistant" as const,
             content:
-              "Want to keep going on this? Or would you rather jump to something new?",
+              content: "Want to keep going on this? Or would you rather jump topics?",
           },
         ]);
       }, 2000);
