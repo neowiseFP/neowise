@@ -21,6 +21,7 @@ export default function Home() {
   const [showCFP, setShowCFP] = useState(false);
   const [showInvestmentCheck, setShowInvestmentCheck] = useState(false);
   const [showCategories, setShowCategories] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
@@ -53,10 +54,14 @@ export default function Home() {
 
   useEffect(() => {
     if (chatRef.current) {
-      chatRef.current.scrollTo({
-        top: chatRef.current.scrollHeight - 150,
-        behavior: "smooth",
-      });
+      const chatDiv = chatRef.current;
+      const lastUserIndex = messages.findLastIndex((m) => m.role === "user");
+      const targetElement = chatDiv.children[lastUserIndex + 1];
+      if (targetElement instanceof HTMLElement) {
+        targetElement.scrollIntoView({ behavior: "smooth" });
+      } else {
+        chatDiv.scrollTo({ top: chatDiv.scrollHeight, behavior: "smooth" });
+      }
     }
   }, [messages]);
 
@@ -209,6 +214,41 @@ export default function Home() {
                 ))}
               </div>
             )}
+
+            {showCategories && !selectedCategory && (
+              <div className="mt-6 flex flex-wrap gap-2 justify-center">
+                {Object.keys(categories).map((cat, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedCategory(cat)}
+                    className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {showCategories && selectedCategory && (
+              <div className="mt-6">
+                <h2 className="font-semibold text-gray-700 mb-2">
+                  {selectedCategory}
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {categories[selectedCategory as keyof typeof categories].map(
+                    (q, j) => (
+                      <button
+                        key={j}
+                        className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
+                        onClick={() => setInput(q)}
+                      >
+                        {q}
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
@@ -226,27 +266,6 @@ export default function Home() {
               Send
             </button>
           </form>
-
-          {showCategories && (
-            <div className="mt-6">
-              {Object.keys(categories).map((cat, i) => (
-                <div key={i} className="mb-4">
-                  <h2 className="font-semibold text-gray-700 mb-2">{cat}</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {categories[cat as keyof typeof categories].map((q, j) => (
-                      <button
-                        key={j}
-                        className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                        onClick={() => setInput(q)}
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
 
           <div className="mt-6 flex justify-center gap-4 flex-wrap">
             <button
