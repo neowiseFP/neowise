@@ -89,8 +89,7 @@ export default function Home() {
           ...prev,
           {
             role: "assistant" as const,
-            content:
-              content: "Want to keep going on this? Or would you rather jump topics?",
+            content: "Want to keep going on this? Or would you rather jump topics?",
           },
         ]);
       }, 2000);
