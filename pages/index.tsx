@@ -213,7 +213,7 @@ export default function Home() {
   const handleLoadSession = async (sessionId: string) => {
     const res = await fetch(`/api/session?id=${sessionId}`);
     const data = await res.json();
-    if (data?.messages) {
+    if (Array.isArray(data?.messages) && data.messages.length > 0) {
       setMessages(data.messages);
       setShowCategories(false);
       setSelectedCategory(null);
