@@ -145,25 +145,28 @@ export default function Home() {
         });
 
         // GPT-powered follow-up
-        setTimeout(async () => {
-          const res = await fetch("/api/follow-up", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reply: data.reply }),
-          });
+       setTimeout(async () => {
+        const res = await fetch("/api/follow-up", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reply: data.reply }),
+        });
 
-          const follow = await res.json();
-          if (follow?.suggestions?.length) {
-            const dynamicPrompt = {
-              role: "assistant" as const,
-              content: follow.suggestions[0],
-            };
+        const follow = await res.json();
 
-            setMessages((prev) => [...prev, dynamicPrompt]);
-            setSuggested(follow.suggestions.slice(1, 3)); // use 2 others as clickable buttons
-          }
+        // ✅ Add natural follow-up reply to messages
+        if (follow?.reply) {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: follow.reply },
+          ]);
+        }
 
-        }, 1000);
+        // ✅ Add 2 clickable suggestions as buttons
+        if (follow?.suggestions?.length) {
+          setSuggested(follow.suggestions.slice(0, 2));
+        }
+      }, 1000);
       } else {
         setMessages([
           ...newMessages,
