@@ -16,8 +16,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       messages: [
         {
           role: "system",
-          content:
-            "You're a helpful financial assistant. Based on the assistant's last reply, generate 2–3 short follow-up questions the user might ask next. Keep each one under 20 words and make them engaging. Return them as a plain list.",
+          content: `You're a helpful financial assistant named Neo.
+
+Based on the assistant’s last message, do two things:
+
+1. Write one short, friendly follow-up message as if continuing the chat — suggest something helpful, curious, or encouraging.
+2. Then generate 2–3 short follow-up questions the user might click on next. Keep them under 20 words and make them practical and relevant.
+
+Respond in this JSON format:
+{
+  "reply": "Your conversational follow-up message...",
+  "suggestions": ["First option", "Second option", "Third option"]
+}`,
         },
         {
           role: "user",
@@ -27,14 +37,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     const raw = completion.choices[0].message.content || "";
-    const suggestions = raw
-      .split("\n")
-      .map((line) => line.replace(/^[\d\-\*\.\s]+/, "").trim())
-      .filter(Boolean);
 
-    res.status(200).json({ suggestions });
+    // Try to safely parse JSON block from GPT
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("No JSON object found in GPT output");
+
+    const parsed = JSON.parse(match[0]);
+
+    res.status(200).json(parsed);
   } catch (err) {
     console.error("GPT follow-up error:", err);
-    res.status(500).json({ error: "Failed to generate follow-ups" });
+    res.status(500).json({ error: "Failed to generate follow-up" });
   }
 }
