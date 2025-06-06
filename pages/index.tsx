@@ -32,6 +32,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const categories = {
