@@ -93,9 +93,12 @@ export default function Home() {
 
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      bottomRef.current.scrollIntoView({ 
+        behavior: "smooth",
+        block: "start",
+      });
     }
-  }, [messages]);
+  }, [messages, loading]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !userId) return;
