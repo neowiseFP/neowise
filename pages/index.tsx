@@ -218,6 +218,7 @@ export default function Home() {
     setSuggested([]);
     setSelectedCategory(null);
     setShowCategories(true);
+    setShowHistory(false);
   };
 
   const handleLoadSession = async (sessionId: string) => {
