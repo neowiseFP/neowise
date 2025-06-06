@@ -17,15 +17,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "Missing or invalid session id" });
   }
 
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("messages")
-    .eq("id", id)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("conversations")
+      .select("messages")
+      .eq("id", id)
+      .single();
 
-  if (error) {
-    return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error("❌ Supabase error:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(200).json({ messages: data?.messages || [] });
+  } catch (err: any) {
+    console.error("❌ Unexpected error in session route:", err);
+    return res.status(500).json({ error: "Unexpected error occurred." });
   }
-
-  res.status(200).json({ messages: data?.messages || [] });
 }
