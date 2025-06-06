@@ -225,15 +225,6 @@ return (
 
       <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
 
-      <div className="text-center text-sm text-gray-500 mt-4 space-x-4">
-        <button onClick={handleStartNewChat} className="underline">
-          Start New Chat
-        </button>
-        <button onClick={() => setShowHistory((prev) => !prev)} className="underline">
-          View History
-        </button>
-      </div>
-
       {showHistory && sessions.length > 0 && (
         <div className="mt-4 text-sm text-gray-600 border-t pt-4 max-w-2xl mx-auto">
           <ul className="space-y-2">
