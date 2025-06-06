@@ -211,208 +211,124 @@ export default function Home() {
     });
     setSessions((prev) => prev.filter((s) => s.id !== sessionId));
   };
-  return (
-    <>
-      <Head>
-        <title>Neo — Your AI Financial Assistant</title>
-      </Head>
-      <div className="min-h-screen bg-gray-50 p-4 text-gray-900 font-sans">
-        <h1 className="text-center text-2xl font-bold mb-1">
-          Neo — Your AI Financial Assistant
-        </h1>
-        <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
+return (
+  <>
+    <Head>
+      <title>Neo — Your AI Financial Assistant</title>
+    </Head>
+    <div className="min-h-screen bg-gray-50 p-4 text-gray-900 font-sans">
+      <h1 className="text-center text-2xl font-bold mb-1">
+        Neo — Your AI Financial Assistant
+      </h1>
+      <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
 
-        <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-          <div className="flex justify-between mb-3">
-            <button
-              onClick={handleStartNewChat}
-              className="text-sm text-blue-600 underline"
-            >
-              Start New Chat
-            </button>
-          </div>
+      <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
 
-          {sessions.length > 0 && (
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-gray-600 mb-1">
-                Past Sessions
-              </h2>
-              <ul className="space-y-1">
-                {sessions.map((session) => (
-                  <li key={session.id} className="flex justify-between items-center text-sm">
-                    <span>{session.title}</span>
-                    <div className="flex gap-2">
-                      <button
-                        className="text-blue-600 underline"
-                        onClick={() => handleLoadSession(session.id)}
-                      >
-                        View
-                      </button>
-                      <button
-                        className="text-red-600 underline"
-                        onClick={() => handleDeleteSession(session.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div
-            ref={chatRef}
-            className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
-          >
-            {messages.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                <span
-                  className={`inline-block px-4 py-2 rounded-lg max-w-[85%] whitespace-pre-wrap text-left ${
-                    m.role === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  {m.content}
-                </span>
-
-                {m.role === "assistant" && m.content.length > 99 && (
-                  <div className="text-sm mt-1">
-                    {["up", "neutral", "down"].map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => {
-                          setFeedback({ ...feedback, [i]: type });
-                          fetch("/api/feedback-log", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              messageIndex: i,
-                              feedback: type,
-                              message: messages[i]?.content,
-                              timestamp: new Date().toISOString(),
-                              userId,
-                            }),
-                          });
-                        }}
-                        className={`${
-                          type === "neutral" ? "mx-2" : ""
-                        } ${feedback[i] === type ? "text-xl scale-110" : "opacity-50"}`}
-                      >
-                        {type === "up" ? "👍" : type === "neutral" ? "🤔" : "👎"}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-                        {loading && (
-              <div className="text-sm text-gray-500 italic">Neo is thinking...</div>
-            )}
-
-            {suggested.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2 mb-4">
-                {suggested.map((q, i) => (
-                  <button
-                    key={i}
-                    className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                    onClick={() => setInput(q)}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {showCategories && !selectedCategory && (
-              <div className="mt-6 flex flex-wrap gap-2 justify-center">
-                {Object.keys(categories).map((cat, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedCategory(cat)}
-                    className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {showCategories && selectedCategory && (
-              <div className="mt-6">
-                <h2 className="font-semibold text-gray-700 mb-2">{selectedCategory}</h2>
-                <div className="flex flex-wrap gap-2">
-                  {categories[selectedCategory as keyof typeof categories].map((q, j) => (
+        {sessions.length > 0 && (
+          <div className="mb-4 text-sm text-gray-600">
+            <h2 className="font-semibold mb-1">Past Sessions</h2>
+            <ul className="space-y-1">
+              {sessions.map((session) => (
+                <li key={session.id} className="flex justify-between items-center">
+                  <span>{session.title}</span>
+                  <div className="flex gap-2">
                     <button
-                      key={j}
-                      className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                      onClick={() => setInput(q)}
+                      onClick={() => handleLoadSession(session.id)}
+                      className="underline"
                     >
-                      {q}
+                      View
                     </button>
-                  ))}
-                </div>
-              </div>
-            )}
+                    <button
+                      onClick={() => handleDeleteSession(session.id)}
+                      className="text-red-500 underline"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything..."
-              className="flex-1 px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring"
-            />
-            <button
-              type="submit"
-              className="bg-black text-white px-4 py-2 rounded"
-            >
-              Send
-            </button>
-          </form>
-
-          <div className="mt-6 flex justify-center gap-4 flex-wrap">
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded shadow"
-              onClick={() => setShowCalculator(true)}
-            >
-              Mortgage Calculator
-            </button>
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded shadow"
-              onClick={() => setShowCFP(true)}
-            >
-              Talk to a CFP®
-            </button>
-            <button
-              className="bg-indigo-600 text-white px-4 py-2 rounded shadow"
-              onClick={() => setShowInvestmentCheck(true)}
-            >
-              Investment Check
-            </button>
-          </div>
+        <div
+          ref={chatRef}
+          className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
+        >
+          {messages.map((m, i) => (
+            <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
+              <span
+                className={`inline-block px-4 py-2 rounded-lg max-w-[85%] whitespace-pre-wrap text-left ${
+                  m.role === "user"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+              >
+                {m.content}
+              </span>
+            </div>
+          ))}
         </div>
 
-        {showCalculator && (
-          <Modal title="Mortgage Calculator" onClose={() => setShowCalculator(false)}>
-            <MortgageCalculator />
-          </Modal>
-        )}
-        {showCFP && (
-          <Modal title="Talk to a CFP®" onClose={() => setShowCFP(false)}>
-            <p>This feature is coming soon! You'll be able to connect directly with a human advisor.</p>
-          </Modal>
-        )}
-        {showInvestmentCheck && (
-          <Modal title="Investment Check" onClose={() => setShowInvestmentCheck(false)}>
-            <p>Coming soon: Neo will help you assess your portfolio, estimate fees, and ask smarter questions.</p>
-          </Modal>
-        )}
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask me anything..."
+            className="flex-1 px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring"
+          />
+          <button type="submit" className="bg-black text-white px-4 py-2 rounded">
+            Send
+          </button>
+        </form>
+
+        <div className="text-center text-sm text-gray-500 mt-3">
+          <button onClick={handleStartNewChat} className="underline">
+            Start New Chat
+          </button>
+        </div>
+
+        <div className="mt-6 flex justify-center gap-4 flex-wrap">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow"
+            onClick={() => setShowCalculator(true)}
+          >
+            Mortgage Calculator
+          </button>
+          <button
+            className="bg-green-600 text-white px-4 py-2 rounded shadow"
+            onClick={() => setShowCFP(true)}
+          >
+            Talk to a CFP®
+          </button>
+          <button
+            className="bg-indigo-600 text-white px-4 py-2 rounded shadow"
+            onClick={() => setShowInvestmentCheck(true)}
+          >
+            Investment Check
+          </button>
+        </div>
       </div>
-    </>
-  );
+
+      {showCalculator && (
+        <Modal title="Mortgage Calculator" onClose={() => setShowCalculator(false)}>
+          <MortgageCalculator />
+        </Modal>
+      )}
+      {showCFP && (
+        <Modal title="Talk to a CFP®" onClose={() => setShowCFP(false)}>
+          <p>This feature is coming soon! You'll be able to connect directly with a human advisor.</p>
+        </Modal>
+      )}
+      {showInvestmentCheck && (
+        <Modal title="Investment Check" onClose={() => setShowInvestmentCheck(false)}>
+          <p>Coming soon: Neo will help you assess your portfolio, estimate fees, and ask smarter questions.</p>
+        </Modal>
+      )}
+    </div>
+  </>
+);
 }
 
 function Modal({
