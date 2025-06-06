@@ -183,17 +183,25 @@ export default function Home() {
 
   const handleStartNewChat = async () => {
     await handleSaveSession();
-    setMessages([
-      {
-        role: "system" as const,
-        content:
-          "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
-      },
-    ]);
+
+    const systemMessage = {
+      role: "system" as const,
+      content:
+        "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
+    };
+
+    // Overwrite the active conversation with just the system message
+    await fetch("/api/save-conversation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, messages: [systemMessage] }),
+    });
+
+    setMessages([systemMessage]);
     setSuggested([]);
     setSelectedCategory(null);
     setShowCategories(true);
-  };
+};
 
   const handleLoadSession = async (sessionId: string) => {
     const res = await fetch(`/api/session?id=${sessionId}`);
@@ -277,9 +285,12 @@ return (
           </button>
         </form>
 
-        <div className="text-center text-sm text-gray-500 mt-3">
+        <div className="text-center text-sm text-gray-500 mt-4 space-x-4">
           <button onClick={handleStartNewChat} className="underline">
             Start New Chat
+          </button>
+          <button onClick={() => setShowHistory((prev) => !prev)} className="underline">
+            View History
           </button>
         </div>
 
