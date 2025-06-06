@@ -75,7 +75,7 @@ export default function Home() {
     setLoading(true);
     setSuggested([]);
 
-    fetch("/api/log-question", {
+    fetch("/api/question-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -181,7 +181,7 @@ export default function Home() {
                     <button
                       onClick={() => {
                         setFeedback({ ...feedback, [i]: "up" });
-                        fetch("/api/feedback", {
+                        fetch("/api/feedback-log", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
@@ -199,7 +199,7 @@ export default function Home() {
                     <button
                       onClick={() => {
                         setFeedback({ ...feedback, [i]: "neutral" });
-                        fetch("/api/feedback", {
+                        fetch("/api/feedback-log", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
@@ -219,7 +219,7 @@ export default function Home() {
                     <button
                       onClick={() => {
                         setFeedback({ ...feedback, [i]: "down" });
-                        fetch("/api/feedback", {
+                        fetch("/api/feedback-log", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
