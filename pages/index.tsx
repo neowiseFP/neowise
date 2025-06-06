@@ -34,6 +34,7 @@ export default function Home() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const categories = {
     "Getting Started": [
@@ -63,20 +64,22 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (chatRef.current) {
-      const chatDiv = chatRef.current;
-      const lastUserIndex = messages.findLastIndex((m) => m.role === "user");
-
-      // Scroll to the next element (assistant reply or loading)
-      const targetElement = chatDiv.children[lastUserIndex + 1];
-
-      if (targetElement instanceof HTMLElement) {
-        targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        chatDiv.scrollTo({ top: chatDiv.scrollHeight, behavior: "smooth" });
-      }
+    let storedId = localStorage.getItem("neoUserId");
+    if (!storedId) {
+      storedId = uuidv4();
+      localStorage.setItem("neoUserId", storedId);
     }
-  }, [messages]);
+
+    setUserId(storedId);
+
+    if (storedId) {
+      fetch(`/api/load-conversation?userId=${storedId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.messages?.length > 0) {
+            setMessages(data.messages);
+          }
+        });
 
       fetch(`/api/load-sessions?userId=${storedId}`)
         .then((res) => res.json())
@@ -87,6 +90,12 @@ export default function Home() {
         });
     }
   }, []);
+
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !userId) return;
@@ -190,7 +199,6 @@ export default function Home() {
         "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
     };
 
-    // Overwrite saved conversation with just system message
     await fetch("/api/save-conversation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -282,6 +290,7 @@ export default function Home() {
             {loading && (
               <div className="text-sm text-gray-500 italic">Neo is thinking...</div>
             )}
+            <div ref={bottomRef} />
           </div>
 
           <form onSubmit={handleSubmit} className="flex gap-2">
