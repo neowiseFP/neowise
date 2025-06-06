@@ -63,22 +63,20 @@ export default function Home() {
   };
 
   useEffect(() => {
-    let storedId = localStorage.getItem("neoUserId");
-    if (!storedId) {
-      storedId = uuidv4();
-      localStorage.setItem("neoUserId", storedId);
+    if (chatRef.current) {
+      const chatDiv = chatRef.current;
+      const lastUserIndex = messages.findLastIndex((m) => m.role === "user");
+
+      // Scroll to the next element (assistant reply or loading)
+      const targetElement = chatDiv.children[lastUserIndex + 1];
+
+      if (targetElement instanceof HTMLElement) {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        chatDiv.scrollTo({ top: chatDiv.scrollHeight, behavior: "smooth" });
+      }
     }
-
-    setUserId(storedId);
-
-    if (storedId) {
-      fetch(`/api/load-conversation?userId=${storedId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.messages?.length > 0) {
-            setMessages(data.messages);
-          }
-        });
+  }, [messages]);
 
       fetch(`/api/load-sessions?userId=${storedId}`)
         .then((res) => res.json())
