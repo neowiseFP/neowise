@@ -554,4 +554,3 @@ function MortgageCalculator() {
       </div>
     </div>
   );
-}
