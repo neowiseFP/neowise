@@ -100,92 +100,102 @@ export default function Home() {
         setScrollOnNextMessage(false);
       }
     }, [messages, loading]);
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || !userId) return;
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!input.trim() || !userId) return;
 
-    const newMessages = [...messages, { role: "user" as const, content: input }];
-    setMessages(newMessages);
-    setScrollOnNextMessage(true);
-    setShowHistory(false);
-    setInput("");
-    setLoading(true);
-    setSuggested([]);
+      const newMessages = [...messages, { role: "user" as const, content: input }];
+      setMessages(newMessages);
+      setScrollOnNextMessage(true);
+      setShowHistory(false);
+      setInput("");
+      setLoading(true);
+      setSuggested([]);
 
-    fetch("/api/question-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question: input.trim(),
-        timestamp: new Date().toISOString(),
-        userId,
-      }),
-    });
-
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages }),
-    });
-
-    const data = await res.json();
-    setLoading(false);
-
-    if (data.reply) {
-      setShowCategories(false);
-
-      const assistantReply = { role: "assistant" as const, content: data.reply };
-      const updatedMessages = [...newMessages, assistantReply];
-      setMessages(updatedMessages);
-
-      await fetch("/api/save-conversation", {
+      fetch("/api/question-log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, messages: updatedMessages }),
+        body: JSON.stringify({
+          question: input.trim(),
+          timestamp: new Date().toISOString(),
+          userId,
+        }),
       });
 
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "Want to keep going on this? Or would you rather jump topics?",
-          },
-        ]);
-      }, 2000);
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
 
-      const lower = input.toLowerCase();
-      if (lower.includes("roth")) {
-        setSuggested([
-          "Can I contribute to a Roth and a 401(k)?",
-          "What are the withdrawal rules?",
-        ]);
-      } else if (lower.includes("529")) {
-        setSuggested([
-          "What if my kid doesn’t go to college?",
-          "Can I change the beneficiary?",
-        ]);
-      } else if (lower.includes("retire")) {
-        setSuggested([
-          "When should I take Social Security?",
-          "What’s a good withdrawal strategy?",
-        ]);
-      } else if (lower.includes("mortgage")) {
-        setSuggested([
-          "How much should I put down?",
-          "What is PMI and can I avoid it?",
-        ]);
+      const data = await res.json();
+      setLoading(false);
+
+      if (data.reply) {
+        setShowCategories(false);
+
+        const assistantReply = { role: "assistant" as const, content: data.reply };
+        const updatedMessages = [...newMessages, assistantReply];
+        setMessages(updatedMessages);
+
+        await fetch("/api/save-conversation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, messages: updatedMessages }),
+        });
+
+        // GPT-powered follow-up
+        setTimeout(async () => {
+          const res = await fetch("/api/follow-up", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reply: data.reply }),
+          });
+
+          const follow = await res.json();
+          if (follow?.followUp) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                role: "assistant",
+                content: follow.followUp,
+              },
+            ]);
+          }
+        }, 1000);
+
+        const lower = input.toLowerCase();
+        if (lower.includes("roth")) {
+          setSuggested([
+            "Can I contribute to a Roth and a 401(k)?",
+            "What are the withdrawal rules?",
+          ]);
+        } else if (lower.includes("529")) {
+          setSuggested([
+            "What if my kid doesn’t go to college?",
+            "Can I change the beneficiary?",
+          ]);
+        } else if (lower.includes("retire")) {
+          setSuggested([
+            "When should I take Social Security?",
+            "What’s a good withdrawal strategy?",
+          ]);
+        } else if (lower.includes("mortgage")) {
+          setSuggested([
+            "How much should I put down?",
+            "What is PMI and can I avoid it?",
+          ]);
+        } else {
+          setSuggested(["Can you explain that more?", "What else should I consider?"]);
+        }
       } else {
-        setSuggested(["Can you explain that more?", "What else should I consider?"]);
+        setMessages([
+          ...newMessages,
+          { role: "assistant", content: "Sorry, something went wrong." },
+        ]);
       }
-    } else {
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: "Sorry, something went wrong." },
-      ]);
-    }
-  };
-
+    };
+    
   const handleSaveSession = async () => {
     if (!userId || messages.length < 2) return;
     
@@ -228,7 +238,9 @@ export default function Home() {
       setMessages(data.messages);
       setShowCategories(false);
       setSelectedCategory(null);
-      setShowHistory(false); // ✅ hides session list after clicking View
+      setShowHistory(false);
+      setScrollOnNextMessage(true);
+      setInput("Can we continue where we left off?");
     }
   };
 
