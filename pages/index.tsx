@@ -211,8 +211,11 @@ export default function Home() {
   };
 
   const handleLoadSession = async (sessionId: string) => {
+    const handleLoadSession = async (sessionId: string) => {
+      
     const res = await fetch(`/api/session?id=${sessionId}`);
     const data = await res.json();
+
     if (Array.isArray(data?.messages) && data.messages.length > 0) {
       setMessages(data.messages);
       setShowCategories(false);
@@ -331,11 +334,14 @@ export default function Home() {
                         })}
                       </span>
                       <div className="flex gap-2">
-                        <button onClick={() => handleLoadSession(session.id)} className="underline">
+                        <button 
+                        onClick={() => handleLoadSession(session.id)} 
+                        className="underline text-blue-600 hover:text-blue-800">
                           View
                         </button>
-                        <button onClick={() => handleDeleteSession(session.id)} className="text-red-500 underline">
-                          Delete
+                        <button onClick={() => handleDeleteSession(session.id)} 
+                        className="underline text-blue-600 hover:text-blue-800">
+
                         </button>
                       </div>
                     </li>
