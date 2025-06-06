@@ -323,7 +323,13 @@ export default function Home() {
               <ul className="space-y-2">
                 {sessions.map((session) => (
                   <li key={session.id} className="flex justify-between items-center">
-                    <span>{session.title}</span>
+                    <span>
+                          {session.title} —{" "}
+                          {new Date(session.created_at).toLocaleString("en-US", {
+                              dateStyle: "long",
+                              timeStyle: "short",
+                           })} 
+                      </span>
                     <div className="flex gap-2">
                       <button onClick={() => handleLoadSession(session.id)} className="underline">
                         View
