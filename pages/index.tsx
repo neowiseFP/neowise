@@ -1,4 +1,3 @@
-// redeploy trigger
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
@@ -94,58 +93,58 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-      if (scrollOnNextMessage && bottomRef.current) {
-        console.log("✅ Scrolling to bottom...");
-        bottomRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-        setScrollOnNextMessage(false);
-      }
-    }, [messages, loading]);
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!input.trim() || !userId) return;
+    if (scrollOnNextMessage && bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      setScrollOnNextMessage(false);
+    }
+  }, [messages, loading]);
 
-      const newMessages = [...messages, { role: "user" as const, content: input }];
-      setMessages(newMessages);
-      setScrollOnNextMessage(true);
-      setShowHistory(false);
-      setInput("");
-      setLoading(true);
-      setSuggested([]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || !userId) return;
 
-      fetch("/api/question-log", {
+    const newMessages = [...messages, { role: "user" as const, content: input }];
+    setMessages(newMessages);
+    setScrollOnNextMessage(true);
+    setShowHistory(false);
+    setInput("");
+    setLoading(true);
+    setSuggested([]);
+
+    fetch("/api/question-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: input.trim(),
+        timestamp: new Date().toISOString(),
+        userId,
+      }),
+    });
+
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: newMessages }),
+    });
+
+    const data = await res.json();
+    setLoading(false);
+
+    if (data.reply) {
+      setShowCategories(false);
+
+      const assistantReply = { role: "assistant" as const, content: data.reply };
+      const updatedMessages = [...newMessages, assistantReply];
+      setMessages(updatedMessages);
+
+      await fetch("/api/save-conversation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: input.trim(),
-          timestamp: new Date().toISOString(),
-          userId,
-        }),
+        body: JSON.stringify({ userId, messages: updatedMessages }),
       });
 
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
-      });
-
-      const data = await res.json();
-      setLoading(false);
-
-      if (data.reply) {
-        setShowCategories(false);
-
-        const assistantReply = { role: "assistant" as const, content: data.reply };
-        const updatedMessages = [...newMessages, assistantReply];
-        setMessages(updatedMessages);
-
-        await fetch("/api/save-conversation", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, messages: updatedMessages }),
-        });
-
-        // GPT-powered follow-up
-       setTimeout(async () => {
+      // GPT follow-up
+      setTimeout(async () => {
         const res = await fetch("/api/follow-up", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -154,7 +153,6 @@ export default function Home() {
 
         const follow = await res.json();
 
-        // ✅ Add natural follow-up reply to messages
         if (follow?.reply) {
           setMessages((prev) => [
             ...prev,
@@ -162,24 +160,21 @@ export default function Home() {
           ]);
         }
 
-        // ✅ Add 2 clickable suggestions as buttons
         if (follow?.suggestions?.length) {
           setSuggested(follow.suggestions.slice(0, 2));
         }
       }, 1000);
-      } else {
-        setMessages([
-          ...newMessages,
-          { role: "assistant", content: "Sorry, something went wrong." },
-        ]);
-      }
-    };
-    
+    } else {
+      setMessages([
+        ...newMessages,
+        { role: "assistant", content: "Sorry, something went wrong." },
+      ]);
+    }
+  };
+
   const handleSaveSession = async () => {
     if (!userId || messages.length < 2) return;
-    
-    console.log("💾 Saving session...");
-    
+
     const title = `Chat – ${new Date().toLocaleDateString("en-US")}`;
     await fetch("/api/save-session", {
       method: "POST",
@@ -211,11 +206,8 @@ export default function Home() {
   };
 
   const handleLoadSession = async (sessionId: string) => {
-    const handleLoadSession = async (sessionId: string) => {
-      
     const res = await fetch(`/api/session?id=${sessionId}`);
     const data = await res.json();
-
     if (Array.isArray(data?.messages) && data.messages.length > 0) {
       setMessages(data.messages);
       setShowCategories(false);
@@ -234,6 +226,7 @@ export default function Home() {
     });
     setSessions((prev) => prev.filter((s) => s.id !== sessionId));
   };
+
   return (
     <>
       <Head>
@@ -243,7 +236,7 @@ export default function Home() {
         <h1 className="text-center text-2xl font-bold mb-1">
           Neo — Your AI Financial Assistant
         </h1>
-        <p className="text-center text-gray-600 mb-4">Ask questions.&nbsp;Get answers.</p>
+        <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
 
         <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
           <div
@@ -323,7 +316,7 @@ export default function Home() {
 
           {showHistory && sessions.length > 0 && (
             <div className="mt-4 text-sm text-gray-600 border-t pt-4 max-w-2xl mx-auto">
-              <div className="max-h-60 overflow-y-auto">
+              <div className="max-h-60 overflow-y-auto pr-1">
                 <ul className="space-y-2">
                   {sessions.map((session) => (
                     <li key={session.id} className="flex justify-between items-center">
@@ -334,14 +327,17 @@ export default function Home() {
                         })}
                       </span>
                       <div className="flex gap-2">
-                        <button 
-                        onClick={() => handleLoadSession(session.id)} 
-                        className="underline text-blue-600 hover:text-blue-800">
+                        <button
+                          onClick={() => handleLoadSession(session.id)}
+                          className="underline text-blue-600 hover:text-blue-800"
+                        >
                           View
                         </button>
-                        <button onClick={() => handleDeleteSession(session.id)} 
-                        className="underline text-blue-600 hover:text-blue-800">
-
+                        <button
+                          onClick={() => handleDeleteSession(session.id)}
+                          className="text-red-500 underline"
+                        >
+                          Delete
                         </button>
                       </div>
                     </li>
@@ -350,6 +346,7 @@ export default function Home() {
               </div>
             </div>
           )}
+
           {suggested.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2 mb-4">
               {suggested.map((q, i) => (
@@ -511,47 +508,47 @@ function MortgageCalculator() {
         >
           <option>30-year fixed</option>
           <option>15-year fixed</option>
-          <option>interest-only</option>
-          <option>adjustable (ARM)</option>
-        </select>
-      </div>
+                <option>interest-only</option>
+      <option>adjustable (ARM)</option>
+    </select>
+  </div>
 
-      <input
-        type="text"
-        value={formatCurrency(price)}
-        onChange={(e) => setPrice(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        placeholder="Home Price"
-      />
-      <input
-        type="text"
-        value={formatCurrency(down)}
-        onChange={(e) => setDown(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        placeholder="Down Payment"
-      />
-      <input
-        type="text"
-        value={`${rate.replace(/[^0-9.]/g, "")}%`}
-        onChange={(e) => setRate(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        placeholder="Interest Rate (%)"
-      />
+  <input
+    type="text"
+    value={formatCurrency(price)}
+    onChange={(e) => setPrice(e.target.value)}
+    className="w-full px-3 py-2 border rounded"
+    placeholder="Home Price"
+  />
+  <input
+    type="text"
+    value={formatCurrency(down)}
+    onChange={(e) => setDown(e.target.value)}
+    className="w-full px-3 py-2 border rounded"
+    placeholder="Down Payment"
+  />
+  <input
+    type="text"
+    value={`${rate.replace(/[^0-9.]/g, "")}%`}
+    onChange={(e) => setRate(e.target.value)}
+    className="w-full px-3 py-2 border rounded"
+    placeholder="Interest Rate (%)"
+  />
 
-      <div className="text-sm text-gray-600">
-        Estimated Term: {years} years
-      </div>
+  <div className="text-sm text-gray-600">
+    Estimated Term: {years} years
+  </div>
 
-      <button
-        onClick={handleCalc}
-        className="w-full bg-blue-600 text-white py-2 rounded"
-      >
-        Calculate
-      </button>
+  <button
+    onClick={handleCalc}
+    className="w-full bg-blue-600 text-white py-2 rounded"
+  >
+    Calculate
+  </button>
 
-      <div className="text-center font-bold">
-        Estimated Monthly: ${parseFloat(monthly).toLocaleString("en-US")}
-      </div>
-    </div>
-  );
+  <div className="text-center font-bold">
+    Estimated Monthly: ${parseFloat(monthly).toLocaleString("en-US")}
+  </div>
+</div>
+);
 }
