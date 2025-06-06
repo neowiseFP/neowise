@@ -93,12 +93,16 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ 
-        behavior: "smooth",
-        block: "start",
-      });
-    }
+    const timeout = setTimeout(() => {
+      if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 50); // wait 50ms for DOM to render
+
+    return () => clearTimeout(timeout);
   }, [messages, loading]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
