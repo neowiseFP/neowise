@@ -224,24 +224,26 @@ return (
 
       <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
 
-        {sessions.length > 0 && (
-          <div className="mb-4 text-sm text-gray-600">
-            <h2 className="font-semibold mb-1">Past Sessions</h2>
+        <div className="text-center text-sm text-gray-500 mt-3 space-x-4">
+          <button onClick={handleStartNewChat} className="underline">
+            Start New Chat
+          </button>
+          <button onClick={() => setShowHistory((prev) => !prev)} className="underline">
+            View Chat History
+          </button>
+        </div>
+
+        {showHistory && sessions.length > 0 && (
+          <div className="mt-3 mb-5 text-sm text-gray-700 border-t pt-4">
             <ul className="space-y-1">
               {sessions.map((session) => (
                 <li key={session.id} className="flex justify-between items-center">
                   <span>{session.title}</span>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handleLoadSession(session.id)}
-                      className="underline"
-                    >
+                    <button onClick={() => handleLoadSession(session.id)} className="underline">
                       View
                     </button>
-                    <button
-                      onClick={() => handleDeleteSession(session.id)}
-                      className="text-red-500 underline"
-                    >
+                    <button onClick={() => handleDeleteSession(session.id)} className="text-red-500 underline">
                       Delete
                     </button>
                   </div>
