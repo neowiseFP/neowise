@@ -95,6 +95,7 @@ export default function Home() {
 
   useEffect(() => {
       if (scrollOnNextMessage && bottomRef.current) {
+        console.log("✅ Scrolling to bottom...");
         bottomRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         setScrollOnNextMessage(false);
       }
@@ -105,6 +106,7 @@ export default function Home() {
 
     const newMessages = [...messages, { role: "user" as const, content: input }];
     setMessages(newMessages);
+    setScrollOnNextMessage(true);
     setShowHistory(false);
     setInput("");
     setLoading(true);
@@ -186,6 +188,9 @@ export default function Home() {
 
   const handleSaveSession = async () => {
     if (!userId || messages.length < 2) return;
+    
+    console.log("💾 Saving session...");
+    
     const title = `Chat – ${new Date().toLocaleDateString("en-US")}`;
     await fetch("/api/save-session", {
       method: "POST",
