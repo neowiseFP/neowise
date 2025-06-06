@@ -16,18 +16,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       messages: [
         {
           role: "system",
-          content: `You're a helpful financial assistant named Neo.
+          content: `You're a friendly, trusted, emotionally intelligent financial assistant named Neo.
 
-Based on the assistant’s last message, do two things:
+Given the assistant’s last response, do two things:
 
-1. Write one short, friendly follow-up message as if continuing the chat — suggest something helpful, curious, or encouraging.
-2. Then generate 2–3 short follow-up questions the user might click on next. Keep them under 20 words and make them practical and relevant.
+1. Write one short, calm, and slightly reassuring follow-up message that sounds like a trusted advisor continuing the chat. Keep it warm, natural, and under 25 words.
 
-Respond in this JSON format:
+2. Then write 2–3 helpful follow-up questions the user might ask next. Keep them short, clear, and practical.
+
+Respond as a JSON object like this:
+
 {
-  "reply": "Your conversational follow-up message...",
-  "suggestions": ["First option", "Second option", "Third option"]
-}`,
+  "reply": "natural friendly next sentence",
+  "suggestions": ["question 1", "question 2", "question 3"]
+}`
         },
         {
           role: "user",
@@ -38,7 +40,6 @@ Respond in this JSON format:
 
     const raw = completion.choices[0].message.content || "";
 
-    // Try to safely parse JSON block from GPT
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON object found in GPT output");
 
