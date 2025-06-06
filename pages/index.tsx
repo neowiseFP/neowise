@@ -7,6 +7,12 @@ type Message = {
   content: string;
 };
 
+type Session = {
+  id: string;
+  title: string;
+  created_at: string;
+};
+
 export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
@@ -25,6 +31,7 @@ export default function Home() {
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const categories = {
@@ -71,26 +78,21 @@ export default function Home() {
             setMessages(data.messages);
           }
         });
+
+      fetch(`/api/load-sessions?userId=${storedId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.sessions) {
+            setSessions(data.sessions);
+          }
+        });
     }
   }, []);
-    useEffect(() => {
-    if (chatRef.current) {
-      const chatDiv = chatRef.current;
-      const lastUserIndex = messages.findLastIndex((m) => m.role === "user");
-      const targetElement = chatDiv.children[lastUserIndex + 1];
-      if (targetElement instanceof HTMLElement) {
-        targetElement.scrollIntoView({ behavior: "smooth" });
-      } else {
-        chatDiv.scrollTo({ top: chatDiv.scrollHeight, behavior: "smooth" });
-      }
-    }
-  }, [messages]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !userId) return;
 
-    const newMessages = [...messages, { role: "user" as const, content: input }];
+    const newMessages = [...messages, { role: "user", content: input }];
     setMessages(newMessages);
     setInput("");
     setLoading(true);
@@ -125,17 +127,14 @@ export default function Home() {
       await fetch("/api/save-conversation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          messages: updatedMessages,
-        }),
+        body: JSON.stringify({ userId, messages: updatedMessages }),
       });
 
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
           {
-            role: "assistant" as const,
+            role: "assistant",
             content: "Want to keep going on this? Or would you rather jump topics?",
           },
         ]);
@@ -166,13 +165,53 @@ export default function Home() {
         setSuggested(["Can you explain that more?", "What else should I consider?"]);
       }
     } else {
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: "Sorry, something went wrong." },
-      ]);
+      setMessages([...newMessages, { role: "assistant", content: "Sorry, something went wrong." }]);
     }
   };
-    return (
+
+  const handleSaveSession = async () => {
+    if (!userId || messages.length < 2) return;
+
+    const title = `Chat – ${new Date().toLocaleDateString("en-US")}`;
+    await fetch("/api/save-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, messages, title }),
+    });
+  };
+
+  const handleStartNewChat = async () => {
+    await handleSaveSession();
+    setMessages([
+      {
+        role: "system",
+        content:
+          "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
+      },
+    ]);
+    setSuggested([]);
+    setSelectedCategory(null);
+    setShowCategories(true);
+  };
+
+  const handleLoadSession = async (sessionId: string) => {
+    const res = await fetch(`/api/session?id=${sessionId}`);
+    const data = await res.json();
+    if (data?.messages) {
+      setMessages(data.messages);
+      setShowCategories(false);
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    await fetch("/api/delete-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId }),
+    });
+    setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+  };
+  return (
     <>
       <Head>
         <title>Neo — Your AI Financial Assistant</title>
@@ -181,11 +220,47 @@ export default function Home() {
         <h1 className="text-center text-2xl font-bold mb-1">
           Neo — Your AI Financial Assistant
         </h1>
-        <p className="text-center text-gray-600 mb-4">
-          Ask questions. Get answers.
-        </p>
+        <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
 
         <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+          <div className="flex justify-between mb-3">
+            <button
+              onClick={handleStartNewChat}
+              className="text-sm text-blue-600 underline"
+            >
+              Start New Chat
+            </button>
+          </div>
+
+          {sessions.length > 0 && (
+            <div className="mb-4">
+              <h2 className="text-sm font-semibold text-gray-600 mb-1">
+                Past Sessions
+              </h2>
+              <ul className="space-y-1">
+                {sessions.map((session) => (
+                  <li key={session.id} className="flex justify-between items-center text-sm">
+                    <span>{session.title}</span>
+                    <div className="flex gap-2">
+                      <button
+                        className="text-blue-600 underline"
+                        onClick={() => handleLoadSession(session.id)}
+                      >
+                        View
+                      </button>
+                      <button
+                        className="text-red-600 underline"
+                        onClick={() => handleDeleteSession(session.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div
             ref={chatRef}
             className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
@@ -232,8 +307,7 @@ export default function Home() {
                 )}
               </div>
             ))}
-
-            {loading && (
+                        {loading && (
               <div className="text-sm text-gray-500 italic">Neo is thinking...</div>
             )}
 
