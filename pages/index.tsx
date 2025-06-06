@@ -367,23 +367,86 @@ function MortgageCalculator() {
   const [rate, setRate] = useState(6.5);
   const [years, setYears] = useState(30);
   const [monthly, setMonthly] = useState("0.00");
+  const [loanType, setLoanType] = useState("30-year fixed");
+
+  const formatCurrency = (num: number) =>
+    `$${num.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
   const handleCalc = () => {
     const loan = price - down;
     const r = rate / 100 / 12;
     const n = years * 12;
-    const m = loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+    let m = 0;
+
+    if (loanType === "interest-only") {
+      m = loan * r; // only monthly interest
+    } else {
+      m = loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    }
+
     setMonthly(isFinite(m) ? m.toFixed(2) : "0.00");
+  };
+
+  const handleLoanTypeChange = (type: string) => {
+    setLoanType(type);
+    if (type === "15-year fixed") setYears(15);
+    if (type === "30-year fixed") setYears(30);
+    if (type === "interest-only") setYears(30);
+    if (type === "adjustable (ARM)") setYears(30);
   };
 
   return (
     <div className="space-y-3">
-      <input type="number" value={price} onChange={(e) => setPrice(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Home Price" />
-      <input type="number" value={down} onChange={(e) => setDown(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Down Payment" />
-      <input type="number" value={rate} onChange={(e) => setRate(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Interest Rate (%)" />
-      <input type="number" value={years} onChange={(e) => setYears(+e.target.value)} className="w-full px-3 py-2 border rounded" placeholder="Loan Term (years)" />
-      <button onClick={handleCalc} className="w-full bg-blue-600 text-white py-2 rounded">Calculate</button>
-      <div className="text-center font-bold">Estimated Monthly: ${monthly}</div>
+      <div>
+        <label className="block mb-1">Loan Type</label>
+        <select
+          value={loanType}
+          onChange={(e) => handleLoanTypeChange(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+        >
+          <option>30-year fixed</option>
+          <option>15-year fixed</option>
+          <option>interest-only</option>
+          <option>adjustable (ARM)</option>
+        </select>
+      </div>
+
+      <input
+        type="number"
+        value={price}
+        onChange={(e) => setPrice(+e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="Home Price"
+      />
+      <input
+        type="number"
+        value={down}
+        onChange={(e) => setDown(+e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="Down Payment"
+      />
+      <input
+        type="number"
+        value={rate}
+        onChange={(e) => setRate(+e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="Interest Rate (%)"
+      />
+      <div className="text-sm text-gray-600">
+        Estimated Term: {years} years
+      </div>
+
+      <button
+        onClick={handleCalc}
+        className="w-full bg-blue-600 text-white py-2 rounded"
+      >
+        Calculate
+      </button>
+
+      <div className="text-center font-bold">
+        Estimated Monthly: ${parseFloat(monthly).toLocaleString("en-US")}
+      </div>
     </div>
   );
 }
