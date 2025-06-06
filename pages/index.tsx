@@ -1,4 +1,3 @@
-// minor whitespace change to force deploy
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
@@ -238,7 +237,7 @@ export default function Home() {
         <h1 className="text-center text-2xl font-bold mb-1">
           Neo — Your AI Financial Assistant
         </h1>
-        <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
+        <p className="text-center text-gray-600 mb-4">Ask questions.&nbsp;Get answers.</p>
 
         <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
           <div
