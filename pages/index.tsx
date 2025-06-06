@@ -362,25 +362,33 @@ function Modal({
 }
 
 function MortgageCalculator() {
-  const [price, setPrice] = useState(500000);
-  const [down, setDown] = useState(100000);
-  const [rate, setRate] = useState(6.5);
+  const [price, setPrice] = useState("500000");
+  const [down, setDown] = useState("100000");
+  const [rate, setRate] = useState("6.5");
   const [years, setYears] = useState(30);
   const [monthly, setMonthly] = useState("0.00");
   const [loanType, setLoanType] = useState("30-year fixed");
 
-  const formatCurrency = (num: number) =>
-    `$${num.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  const formatCurrency = (value: string) => {
+    const num = parseFloat(value.replace(/[^0-9.]/g, ""));
+    return isNaN(num) ? "" : `$${num.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  };
+
+  const parseCurrency = (value: string) =>
+    parseFloat(value.replace(/[^0-9.]/g, "")) || 0;
+
+  const parseRate = (value: string) =>
+    parseFloat(value.replace(/[^0-9.]/g, "")) || 0;
 
   const handleCalc = () => {
-    const loan = price - down;
-    const r = rate / 100 / 12;
+    const loan = parseCurrency(price) - parseCurrency(down);
+    const r = parseRate(rate) / 100 / 12;
     const n = years * 12;
 
     let m = 0;
 
     if (loanType === "interest-only") {
-      m = loan * r; // only monthly interest
+      m = loan * r;
     } else {
       m = loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     }
@@ -413,26 +421,27 @@ function MortgageCalculator() {
       </div>
 
       <input
-        type="number"
-        value={price}
-        onChange={(e) => setPrice(+e.target.value)}
+        type="text"
+        value={formatCurrency(price)}
+        onChange={(e) => setPrice(e.target.value)}
         className="w-full px-3 py-2 border rounded"
         placeholder="Home Price"
       />
       <input
-        type="number"
-        value={down}
-        onChange={(e) => setDown(+e.target.value)}
+        type="text"
+        value={formatCurrency(down)}
+        onChange={(e) => setDown(e.target.value)}
         className="w-full px-3 py-2 border rounded"
         placeholder="Down Payment"
       />
       <input
-        type="number"
-        value={rate}
-        onChange={(e) => setRate(+e.target.value)}
+        type="text"
+        value={`${rate.replace(/[^0-9.]/g, "")}%`}
+        onChange={(e) => setRate(e.target.value)}
         className="w-full px-3 py-2 border rounded"
         placeholder="Interest Rate (%)"
       />
+
       <div className="text-sm text-gray-600">
         Estimated Term: {years} years
       </div>
