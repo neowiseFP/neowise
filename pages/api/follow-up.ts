@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         {
           role: "system",
           content:
-            "You're a helpful financial assistant. Based on the assistant's last message, suggest a thoughtful, curiosity-sparking follow-up question. Keep it conversational and under 30 words.",
+            "You're a helpful financial assistant. Based on the assistant's last reply, generate 2–3 short follow-up questions the user might ask next. Keep each one under 20 words and make them engaging. Return them as a plain list.",
         },
         {
           role: "user",
@@ -26,10 +26,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
     });
 
-    const followUp = completion.choices[0].message.content;
-    res.status(200).json({ followUp });
+    const raw = completion.choices[0].message.content || "";
+    const suggestions = raw
+      .split("\n")
+      .map((line) => line.replace(/^[\d\-\*\.\s]+/, "").trim())
+      .filter(Boolean);
+
+    res.status(200).json({ suggestions });
   } catch (err) {
     console.error("GPT follow-up error:", err);
-    res.status(500).json({ error: "Failed to generate follow-up" });
+    res.status(500).json({ error: "Failed to generate follow-ups" });
   }
 }
