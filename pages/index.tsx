@@ -10,7 +10,7 @@ type Message = {
 type Session = {
   id: string;
   title: string;
-  created_at: string;
+  updated_at: string;
 };
 
 export default function Home() {
@@ -323,7 +323,7 @@ export default function Home() {
                   {sessions.map((session) => (
                     <li key={session.id} className="flex justify-between items-center">
                       <span>
-                        {new Date(session.created_at).toLocaleString("en-US", {
+                        new Date(session.updated_at).toLocaleString("en-US", {
                           dateStyle: "long",
                           timeStyle: "short",
                         })}
