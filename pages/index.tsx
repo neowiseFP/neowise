@@ -184,7 +184,7 @@ export default function Home() {
     await handleSaveSession();
     setMessages([
       {
-        role: "system",
+        role: "system" as const,
         content:
           "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
       },
