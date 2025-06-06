@@ -153,41 +153,17 @@ export default function Home() {
           });
 
           const follow = await res.json();
-          if (follow?.followUp) {
-            setMessages((prev) => [
-              ...prev,
-              {
-                role: "assistant",
-                content: follow.followUp,
-              },
-            ]);
-          }
-        }, 1000);
+          if (follow?.suggestions?.length) {
+            const dynamicPrompt = {
+              role: "assistant" as const,
+              content: follow.suggestions[0],
+            };
 
-        const lower = input.toLowerCase();
-        if (lower.includes("roth")) {
-          setSuggested([
-            "Can I contribute to a Roth and a 401(k)?",
-            "What are the withdrawal rules?",
-          ]);
-        } else if (lower.includes("529")) {
-          setSuggested([
-            "What if my kid doesn’t go to college?",
-            "Can I change the beneficiary?",
-          ]);
-        } else if (lower.includes("retire")) {
-          setSuggested([
-            "When should I take Social Security?",
-            "What’s a good withdrawal strategy?",
-          ]);
-        } else if (lower.includes("mortgage")) {
-          setSuggested([
-            "How much should I put down?",
-            "What is PMI and can I avoid it?",
-          ]);
-        } else {
-          setSuggested(["Can you explain that more?", "What else should I consider?"]);
-        }
+            setMessages((prev) => [...prev, dynamicPrompt]);
+            setSuggested(follow.suggestions.slice(1, 3)); // use 2 others as clickable buttons
+          }
+
+        }, 1000);
       } else {
         setMessages([
           ...newMessages,
