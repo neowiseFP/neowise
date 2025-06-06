@@ -32,6 +32,7 @@ export default function Home() {
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [scrollOnNextMessage, setScrollOnNextMessage] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -93,23 +94,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (bottomRef.current) {
-        bottomRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+      if (scrollOnNextMessage && bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        setScrollOnNextMessage(false);
       }
-    }, 50); // wait 50ms for DOM to render
-
-    return () => clearTimeout(timeout);
-  }, [messages, loading]);
+    }, [messages, loading]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !userId) return;
 
     const newMessages = [...messages, { role: "user" as const, content: input }];
     setMessages(newMessages);
+    setShowHistory(false);
     setInput("");
     setLoading(true);
     setSuggested([]);
@@ -225,6 +221,8 @@ export default function Home() {
     if (data?.messages) {
       setMessages(data.messages);
       setShowCategories(false);
+      setSelectedCategory(null);
+      setShowHistory(false); // ✅ hides session list after clicking View
     }
   };
 
