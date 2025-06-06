@@ -14,11 +14,11 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { messageIndex, feedback, message, timestamp } = req.body;
+  const { feedback, timestamp, userId } = req.body;
 
-  const { error } = await supabase.from("feedback").insert([
-    { message_index: messageIndex, feedback, message, timestamp },
-  ]);
+  const { error } = await supabase
+    .from("feedback")
+    .insert([{ feedback, timestamp, user_id: userId }]);
 
   if (error) {
     return res.status(500).json({ error: "Failed to log feedback" });

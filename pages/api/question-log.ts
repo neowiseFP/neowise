@@ -14,11 +14,11 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { question, timestamp } = req.body;
+  const { question, timestamp, userId } = req.body;
 
   const { error } = await supabase
     .from("questions")
-    .insert([{ question, timestamp }]);
+    .insert([{ question, timestamp, user_id: userId }]); // assuming your table has a `user_id` column
 
   if (error) {
     return res.status(500).json({ error: "Failed to log question" });

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
+import { v4 as uuidv4 } from "uuid";
 
 type Message = {
   role: "user" | "assistant" | "system";
@@ -7,6 +8,7 @@ type Message = {
 };
 
 export default function Home() {
+  const [userId, setUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
@@ -53,6 +55,25 @@ export default function Home() {
   };
 
   useEffect(() => {
+    let storedId = localStorage.getItem("neoUserId");
+    if (!storedId) {
+      storedId = uuidv4();
+      localStorage.setItem("neoUserId", storedId);
+    }
+
+    setUserId(storedId);
+
+    if (storedId) {
+      fetch(`/api/load-conversation?userId=${storedId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.messages?.length > 0) {
+            setMessages(data.messages);
+          }
+        });
+    }
+  }, []);
+    useEffect(() => {
     if (chatRef.current) {
       const chatDiv = chatRef.current;
       const lastUserIndex = messages.findLastIndex((m) => m.role === "user");
@@ -67,7 +88,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !userId) return;
 
     const newMessages = [...messages, { role: "user" as const, content: input }];
     setMessages(newMessages);
@@ -81,6 +102,7 @@ export default function Home() {
       body: JSON.stringify({
         question: input.trim(),
         timestamp: new Date().toISOString(),
+        userId,
       }),
     });
 
@@ -100,19 +122,26 @@ export default function Home() {
       const updatedMessages = [...newMessages, assistantReply];
       setMessages(updatedMessages);
 
+      await fetch("/api/save-conversation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          messages: updatedMessages,
+        }),
+      });
+
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant" as const,
-            content:
-              "Want to keep going on this? Or would you rather jump topics?",
+            content: "Want to keep going on this? Or would you rather jump topics?",
           },
         ]);
       }, 2000);
 
       const lower = input.toLowerCase();
-
       if (lower.includes("roth")) {
         setSuggested([
           "Can I contribute to a Roth and a 401(k)?",
@@ -134,10 +163,7 @@ export default function Home() {
           "What is PMI and can I avoid it?",
         ]);
       } else {
-        setSuggested([
-          "Can you explain that more?",
-          "What else should I consider?",
-        ]);
+        setSuggested(["Can you explain that more?", "What else should I consider?"]);
       }
     } else {
       setMessages([
@@ -146,7 +172,7 @@ export default function Home() {
       ]);
     }
   };
-  return (
+    return (
     <>
       <Head>
         <title>Neo — Your AI Financial Assistant</title>
@@ -178,62 +204,30 @@ export default function Home() {
 
                 {m.role === "assistant" && m.content.length > 99 && (
                   <div className="text-sm mt-1">
-                    <button
-                      onClick={() => {
-                        setFeedback({ ...feedback, [i]: "up" });
-                        fetch("/api/feedback-log", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            messageIndex: i,
-                            feedback: "up",
-                            message: messages[i]?.content,
-                            timestamp: new Date().toISOString(),
-                          }),
-                        });
-                      }}
-                      className={feedback[i] === "up" ? "text-xl scale-110" : "opacity-50"}
-                    >
-                      👍
-                    </button>
-                    <button
-                      onClick={() => {
-                        setFeedback({ ...feedback, [i]: "neutral" });
-                        fetch("/api/feedback-log", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            messageIndex: i,
-                            feedback: "neutral",
-                            message: messages[i]?.content,
-                            timestamp: new Date().toISOString(),
-                          }),
-                        });
-                      }}
-                      className={`mx-2 ${
-                        feedback[i] === "neutral" ? "text-xl scale-110" : "opacity-50"
-                      }`}
-                    >
-                      🤔
-                    </button>
-                    <button
-                      onClick={() => {
-                        setFeedback({ ...feedback, [i]: "down" });
-                        fetch("/api/feedback-log", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            messageIndex: i,
-                            feedback: "down",
-                            message: messages[i]?.content,
-                            timestamp: new Date().toISOString(),
-                          }),
-                        });
-                      }}
-                      className={feedback[i] === "down" ? "text-xl scale-110" : "opacity-50"}
-                    >
-                      👎
-                    </button>
+                    {["up", "neutral", "down"].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setFeedback({ ...feedback, [i]: type });
+                          fetch("/api/feedback-log", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              messageIndex: i,
+                              feedback: type,
+                              message: messages[i]?.content,
+                              timestamp: new Date().toISOString(),
+                              userId,
+                            }),
+                          });
+                        }}
+                        className={`${
+                          type === "neutral" ? "mx-2" : ""
+                        } ${feedback[i] === type ? "text-xl scale-110" : "opacity-50"}`}
+                      >
+                        {type === "up" ? "👍" : type === "neutral" ? "🤔" : "👎"}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
