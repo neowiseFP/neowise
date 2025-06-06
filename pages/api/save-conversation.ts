@@ -11,21 +11,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { userId, messages } = req.body;
+  try {
+    const { userId, messages } = req.body;
 
-  const { error } = await supabase
-    .from("conversations")
-    .upsert([
-      {
-        user_id: userId,
-        messages,
-        updated_at: new Date().toISOString(),
-      },
-    ], { onConflict: "user_id" });
+    if (!userId || !messages) {
+      console.error("Missing userId or messages");
+      return res.status(400).json({ error: "Missing userId or messages" });
+    }
 
-  if (error) {
-    return res.status(500).json({ error: "Failed to save conversation" });
+    const { error } = await supabase
+      .from("conversations")
+      .upsert([
+        {
+          user_id: userId,
+          messages,
+          updated_at: new Date().toISOString(),
+        },
+      ], { onConflict: "user_id" });
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return res.status(500).json({ error: "Failed to save conversation" });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Unhandled error:", err);
+    return res.status(500).json({ error: "Unhandled exception" });
   }
-
-  return res.status(200).json({ success: true });
 }

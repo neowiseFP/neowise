@@ -14,15 +14,26 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { question, timestamp, userId } = req.body;
+  try {
+    const { question, timestamp, userId } = req.body;
 
-  const { error } = await supabase
-    .from("questions")
-    .insert([{ question, timestamp, user_id: userId }]); // assuming your table has a `user_id` column
+    if (!question || !userId || !timestamp) {
+      console.error("Missing question, userId, or timestamp");
+      return res.status(400).json({ error: "Missing required fields" });
+    }
 
-  if (error) {
-    return res.status(500).json({ error: "Failed to log question" });
+    const { error } = await supabase
+      .from("questions")
+      .insert([{ question, timestamp, user_id: userId }]);
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return res.status(500).json({ error: "Failed to log question" });
+    }
+
+    return res.status(200).json({ status: "ok" });
+  } catch (err) {
+    console.error("Unhandled error:", err);
+    return res.status(500).json({ error: "Unhandled exception" });
   }
-
-  return res.status(200).json({ status: "ok" });
 }
