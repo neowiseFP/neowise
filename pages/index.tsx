@@ -206,6 +206,7 @@ export default function Home() {
   };
 
   const handleLoadSession = async (sessionId: string) => {
+    console.log("📦 Attempting to load session:", sessionId);
     const res = await fetch(`/api/session?id=${sessionId}`);
     const data = await res.json();
     if (Array.isArray(data?.messages) && data.messages.length > 0) {
@@ -215,6 +216,7 @@ export default function Home() {
       setShowHistory(false);
       setScrollOnNextMessage(true);
       setInput("Can we continue where we left off?");
+      console.warn("⚠️ No messages loaded from session:", data);
     }
   };
 
