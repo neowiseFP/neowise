@@ -245,7 +245,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
           <div
             ref={chatRef}
-            className="space-y-4 mb-4 max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
+            className="space-y-4 mb-4 min-h-[50vh] max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
           >
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
@@ -320,28 +320,28 @@ export default function Home() {
 
           {showHistory && sessions.length > 0 && (
             <div className="mt-4 text-sm text-gray-600 border-t pt-4 max-w-2xl mx-auto">
-              <ul className="space-y-2">
-                {sessions.map((session) => (
-                  <li key={session.id} className="flex justify-between items-center">
-                    <span>
-                          {new Date(session.created_at).toLocaleString("en-US", {
-                              dateStyle: "long",
-                              timeStyle: "short",
-                           })} 
+              <div className="max-h-60 overflow-y-auto">
+                <ul className="space-y-2">
+                  {sessions.map((session) => (
+                    <li key={session.id} className="flex justify-between items-center">
+                      <span>
+                        {new Date(session.created_at).toLocaleString("en-US", {
+                          dateStyle: "long",
+                          timeStyle: "short",
+                        })}
                       </span>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleLoadSession(session.id)}
-                        className="underline text-blue-600 hover:text-blue-800">
-                        View
-                      </button>
-                      <button onClick={() => handleDeleteSession(session.id)} className="text-red-500 underline">
-                        Delete
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleLoadSession(session.id)} className="underline">
+                          View
+                        </button>
+                        <button onClick={() => handleDeleteSession(session.id)} className="text-red-500 underline">
+                          Delete
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
           {suggested.length > 0 && (
