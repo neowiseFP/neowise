@@ -323,22 +323,16 @@ export default function Home() {
                   {sessions.map((session) => (
                     <li key={session.id} className="flex justify-between items-center">
                       <span>
-                        new Date(session.updated_at).toLocaleString("en-US", {
+                        {new Date(session.updated_at).toLocaleString("en-US", {
                           dateStyle: "long",
                           timeStyle: "short",
-                        })}
+                        } as Intl.DateTimeFormatOptions)}
                       </span>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleLoadSession(session.id)}
-                          className="underline text-blue-600 hover:text-blue-800"
-                        >
+                        <button onClick={() => handleLoadSession(session.id)} className="underline">
                           View
                         </button>
-                        <button
-                          onClick={() => handleDeleteSession(session.id)}
-                          className="text-red-500 underline"
-                        >
+                        <button onClick={() => handleDeleteSession(session.id)} className="text-red-500 underline">
                           Delete
                         </button>
                       </div>
