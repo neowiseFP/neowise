@@ -132,8 +132,8 @@ export default function Home() {
 
     if (data.reply) {
       setShowCategories(false);
-      const assistantReply = { role: "assistant", content: data.reply };
-      const updatedMessages = [...newMessages, assistantReply];
+      const assistantReply: Message = { role: "assistant", content: data.reply };
+      const updatedMessages: Message[] = [...newMessages, assistantReply];
       setMessages(updatedMessages);
 
       await fetch("/api/save-conversation", {
