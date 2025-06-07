@@ -1,5 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -7,18 +7,28 @@ const supabase = createClient(
 );
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const userId = req.query.userId as string;
+  const { userId } = req.query;
 
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("id, title, updated_at")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false });
-
-  if (error) {
-    console.error("Supabase error:", error);
-    return res.status(500).json({ error: "Failed to load sessions" });
+  if (!userId || typeof userId !== "string") {
+    return res.status(400).json({ error: "Missing or invalid userId" });
   }
 
-  return res.status(200).json({ sessions: data });
+  try {
+    const { data, error } = await supabase
+      .from("conversations")
+      .select("id, title, updated_at")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("❌ Supabase error:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(200).json({ sessions: data });
+  } catch (err: any) {
+    console.error("❌ Unexpected error:", err);
+    return res.status(500).json({ error: "Unexpected error occurred." });
+  }
 }
