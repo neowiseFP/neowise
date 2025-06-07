@@ -100,7 +100,10 @@ export default function Home() {
     e.preventDefault();
     if (!input.trim() || !userId) return;
 
-    const newMessages = [...messages, { role: "user", content: input }];
+  const newMessages: Message[] = [
+    ...messages,
+    { role: "user" as const, content: input }
+  ];    
     setMessages(newMessages);
     setScrollOnNextMessage(true);
     setShowHistory(false);
