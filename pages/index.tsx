@@ -312,39 +312,55 @@ export default function Home() {
 
           <div className="text-center text-sm text-gray-500 mt-4 space-x-4">
             <button onClick={handleStartNewChat} className="underline">
-              Start New Chat
-            </button>
-            <button onClick={() => setShowHistory((prev) => !prev)} className="underline">
-              View History
-            </button>
-          </div>
+    Start New Chat
+  </button>
+  <button
+    onClick={() => {
+      console.log("🕹️ Toggle View History clicked");
+      setShowHistory((prev) => !prev);
+    }}
+    className="underline"
+  >
+    View History
+  </button>
+</div>
 
-          {showHistory && sessions.length > 0 && (
-            <div className="mt-4 text-sm text-gray-600 border-t pt-4 max-w-2xl mx-auto">
-              <div className="max-h-60 overflow-y-auto pr-1">
-                <ul className="space-y-2">
-                  {sessions.map((session) => (
-                    <li key={session.id} className="flex justify-between items-center">
-                      <span>
-                        {new Date(session.updated_at).toLocaleString("en-US", {
-                          dateStyle: "long",
-                          timeStyle: "short",
-                        } as Intl.DateTimeFormatOptions)}
-                      </span>
-                      <div className="flex gap-2">
-                        <button onClick={() => handleLoadSession(session.id)} className="underline">
-                          View
-                        </button>
-                        <button onClick={() => handleDeleteSession(session.id)} className="text-red-500 underline">
-                          Delete
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+{showHistory && sessions.length > 0 && (
+  <div>
+    <p className="text-sm text-green-600 text-center mt-2">✅ View History panel active</p>
+
+    <div className="mt-4 text-sm text-gray-600 border-t pt-4 max-w-2xl mx-auto">
+      <div className="max-h-60 overflow-y-auto pr-1">
+        <ul className="space-y-2">
+          {sessions.map((session) => (
+            <li key={session.id} className="flex justify-between items-center">
+              <span>
+                {new Date(session.updated_at).toLocaleString("en-US", {
+                  dateStyle: "long",
+                  timeStyle: "short",
+                } as Intl.DateTimeFormatOptions)}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleLoadSession(session.id)}
+                  className="underline"
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => handleDeleteSession(session.id)}
+                  className="text-red-500 underline"
+                >
+                  Delete
+                </button>
               </div>
-            </div>
-          )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
 
           {suggested.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2 mb-4">
