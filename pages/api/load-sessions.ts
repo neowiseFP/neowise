@@ -10,10 +10,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userId = req.query.userId as string;
 
   const { data, error } = await supabase
-    .from("sessions")
-    .select("id, title, created_at")
+    .from("conversations")
+    .select("id, title, updated_at")
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
 
   if (error) {
     console.error("Supabase error:", error);
