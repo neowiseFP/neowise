@@ -180,7 +180,7 @@ export default function Home() {
 
   const handleStartNewChat = async () => {
     await handleSaveSession();
-    const systemMessage = {
+    const systemMessage: Message = {
       role: "system",
       content:
         "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
