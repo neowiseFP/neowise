@@ -233,7 +233,7 @@ export default function Home() {
         </h1>
         <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
 
-        <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+        <div className="max-w-2xl mx-auto bg-white px-4 py-6 sm:px-6 rounded shadow">
           <div
             ref={chatRef}
             className="space-y-4 mb-4 min-h-[50vh] max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
@@ -294,16 +294,19 @@ export default function Home() {
             </div> {/* closes chat scroll area */}
 
             {suggested.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4 mb-2">
-                {suggested.map((q, i) => (
-                  <button
-                    key={i}
-                    className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                    onClick={() => setInput(q)}
-                  >
-                    {q}
-                  </button>
-                ))}
+              <div className="mt-4 mb-2 bg-gray-50 p-3 rounded-lg shadow-sm border">
+                <div className="text-sm font-medium text-gray-700 mb-1">Want to keep going?</div>
+                <div className="flex flex-wrap gap-2">
+                  {suggested.map((q, i) => (
+                    <button
+                      key={i}
+                      className="bg-white border px-3 py-1 rounded text-sm hover:bg-gray-100"
+                      onClick={() => setInput(q)}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -8,14 +8,13 @@
 }
 
 .dot-animation {
-  animation: blink 1.2s steps(1, end) infinite;
+  animation: blink 1.4s infinite;
   animation-fill-mode: both;
 }
 
 .dot-animation.delay-200 {
   animation-delay: 0.2s;
 }
-
 .dot-animation.delay-400 {
   animation-delay: 0.4s;
 }
