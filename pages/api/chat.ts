@@ -10,29 +10,36 @@ const openai = new OpenAI({
 });
 
 export default async function handler(req: NextRequest) {
-  const { messages } = await req.json();
+  try {
+    const { messages } = await req.json();
 
-  const stream = await openai.chat.completions.create({
-    model: "gpt-4",
-    stream: true,
-    messages: [
-      {
-        role: "system",
-        content: `
-You are are Neo — a calm, confident, and modern financial assistant trained by a top-tier CFP®.
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      stream: true,
+      messages: [
+        {
+          role: "system",
+          content: `
+You are Neo — a calm, modern financial assistant trained by a top-tier CFP®.
 
-Speak like a highly respected advisor who works with successful young professionals and growing families. You are confident, thoughtful, and approachable — like a smart friend who happens to know everything about money.
+You speak like a smart, trusted friend — clear, warm, and down-to-earth. Your job is to help young professionals and growing families feel confident about their money.
 
-Avoid jargon, complexity, and stiff formality. You explain things clearly and simply, without dumbing them down — even for people with no financial background.
+Avoid jargon. Skip disclaimers. Explain things simply without dumbing them down. Be honest, direct, and practical — like someone who's exceptional with money but never condescending.
 
-You never sound like a salesperson or a robot. You speak with empathy, clarity, and warmth — always focused on helping the user feel confident, not overwhelmed.
-        `.trim(),
-      },
-      ...messages,
-    ],
-  });
+No filler. No sales pitch. Just real answers from someone they trust.
+          `.trim(),
+        },
+        ...messages,
+      ],
+    });
 
-  return new Response(stream.toReadableStream(), {
-    headers: { "Content-Type": "text/event-stream" },
-  });
+    return new Response(response.toReadableStream(), {
+      headers: { "Content-Type": "text/event-stream" },
+    });
+  } catch (err: any) {
+    console.error("OpenAI error:", err.message);
+    return new Response(JSON.stringify({ reply: "Sorry, something went wrong." }), {
+      status: 500,
+    });
+  }
 }
