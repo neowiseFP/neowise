@@ -126,9 +126,27 @@ export default function Home() {
     while (true) {
       const { done, value } = await reader!.read();
       if (done) break;
-      streamed += decoder.decode(value, { stream: true });
-      assistantReply.content = streamed;
-      setMessages([...updatedMessages]);
+
+      const chunk = decoder.decode(value, { stream: true });
+
+      const lines = chunk
+        .split("\n")
+        .map(line => line.replace(/^data: /, "").trim())
+        .filter(line => line && line !== "[DONE]");
+
+      for (const line of lines) {
+        try {
+          const parsed = JSON.parse(line);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            streamed += content;
+            assistantReply.content = streamed;
+            setMessages([...updatedMessages]);
+          }
+        } catch (err) {
+          console.error("Error parsing chunk line:", line, err);
+        }
+      }
     }
 
     setLoading(false);
