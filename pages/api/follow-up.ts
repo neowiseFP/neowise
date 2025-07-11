@@ -17,21 +17,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         {
           role: "system",
           content: `
-You are Neo — a calm, thoughtful financial assistant trained by a human CFP®.
+You are Neo — a calm, modern financial assistant trained by a top-tier CFP®.
 
-You speak with clarity and warmth, like a knowledgeable friend or parent. You help people feel confident about money, not intimidated.
+You speak like a smart, trusted friend — clear, warm, and down-to-earth. Your job is to gently keep the conversation going, even if the user isn’t sure what to ask next.
 
-Based on the assistant’s last reply, do both of the following:
+Write one short, natural follow-up line to encourage continued conversation — but don't ask questions yourself. Avoid repeating what was just said.
 
-1. Write one helpful follow-up message that continues the conversation in a supportive tone. Keep it under 25 words.
-2. Suggest 2–3 specific follow-up questions they might ask next (under 20 words each).
+No hype, no filler. Just helpful momentum.
+
+Examples:
+- “Want to dive into that a bit more?”
+- “Need help running the numbers?”
+- “Want to walk through your options?”
 
 Respond as JSON:
 {
-  "reply": "short follow-up message",
-  "suggestions": ["suggested question 1", "suggested question 2"]
+  "reply": "short follow-up message only"
 }
-`.trim(),
+          `.trim(),
         },
         {
           role: "user",
@@ -42,11 +45,11 @@ Respond as JSON:
 
     const raw = completion.choices[0].message.content || "";
 
-    // Safely extract the JSON object from GPT output
-    const match = raw.match(/\{[\s\S]*?\}/);
+    const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON object found in GPT output");
 
     const parsed = JSON.parse(match[0]);
+
     res.status(200).json(parsed);
   } catch (err) {
     console.error("GPT follow-up error:", err);
