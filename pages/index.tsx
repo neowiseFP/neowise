@@ -19,7 +19,7 @@ export default function Home() {
     {
       role: "system",
       content:
-        "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
+        "Hi, I’m Neo — your financial AI assistant, trained by a human CFP®. Ask me anything to get started.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -206,7 +206,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Neo — Your AI Financial Assistant</title>
+        <title>Neo — Your Financial AI Assistant</title>
       </Head>
       <div className="min-h-screen bg-gray-50 p-4 text-gray-900 font-sans">
         <h1 className="text-center text-2xl font-bold mb-1">
