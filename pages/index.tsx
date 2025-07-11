@@ -162,11 +162,10 @@ export default function Home() {
 
       if (follow?.reply) {
         setMessages((prev) => [...prev, { role: "assistant", content: follow.reply }]);
-        setScrollOnNextMessage(true);
       }
 
       if (follow?.suggestions?.length) {
-        setSuggested(follow.suggestions.slice(0, 2)); // ← this is critical
+        setSuggested(follow.suggestions.slice(0, 2));
       }
     }, 200);
   };
