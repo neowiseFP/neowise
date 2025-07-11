@@ -160,11 +160,13 @@ export default function Home() {
 
       const follow = await res.json();
 
-      console.log("📬 Follow-up response:", follow);
-
       if (follow?.reply) {
         setMessages((prev) => [...prev, { role: "assistant", content: follow.reply }]);
         setScrollOnNextMessage(true);
+      }
+
+      if (follow?.suggestions?.length) {
+        setSuggested(follow.suggestions.slice(0, 2)); // ← this is critical
       }
     }, 1500);
   };
