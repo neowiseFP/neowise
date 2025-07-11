@@ -71,14 +71,6 @@ export default function Home() {
     setUserId(storedId);
 
     if (storedId) {
-      fetch(`/api/load-conversation?userId=${storedId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.messages?.length > 0) {
-            setMessages(data.messages);
-          }
-        });
-
       fetch(`/api/load-sessions?userId=${storedId}`)
         .then((res) => res.json())
         .then((data) => {
@@ -96,76 +88,74 @@ export default function Home() {
     }
   }, [messages, loading]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || !userId) return;
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!input.trim() || !userId) return;
 
   const newMessages: Message[] = [
     ...messages,
-    { role: "user" as const, content: input }
-  ];    
-    setMessages(newMessages);
-    setScrollOnNextMessage(true);
-    setShowHistory(false);
-    setInput("");
-    setLoading(true);
-    setSuggested([]);
+    { role: "user", content: input },
+  ];
 
-    fetch("/api/question-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question: input.trim(),
-        timestamp: new Date().toISOString(),
-        userId,
-      }),
-    });
+  setMessages(newMessages);
+  setScrollOnNextMessage(true);
+  setShowHistory(false);
+  setInput("");
+  setLoading(true);
+  setSuggested([]);
 
-    const res = await fetch("/api/chat", {
+  fetch("/api/question-log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      question: input.trim(),
+      timestamp: new Date().toISOString(),
+      userId,
+    }),
+  });
+
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages: newMessages }),
     });
 
-    const data = await res.json();
-    setLoading(false);
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder("utf-8");
 
-    if (data.reply) {
-      setShowCategories(false);
-      const assistantReply: Message = { role: "assistant", content: data.reply };
-      const updatedMessages: Message[] = [...newMessages, assistantReply];
-      setMessages(updatedMessages);
+    let streamed = "";
+    const assistantReply: Message = { role: "assistant", content: "" };
+    const updatedMessages = [...newMessages, assistantReply];
+    setMessages(updatedMessages);
 
-      await fetch("/api/save-conversation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, messages: updatedMessages }),
-      });
-
-      setTimeout(async () => {
-        const res = await fetch("/api/follow-up", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reply: data.reply }),
-        });
-
-        const follow = await res.json();
-
-        if (follow?.reply) {
-          setMessages((prev) => [...prev, { role: "assistant", content: follow.reply }]);
-        }
-
-        if (follow?.suggestions?.length) {
-          setSuggested(follow.suggestions.slice(0, 2));
-        }
-      }, 1000);
-    } else {
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: "Sorry, something went wrong." },
-      ]);
+    while (true) {
+      const { done, value } = await reader!.read();
+      if (done) break;
+      streamed += decoder.decode(value, { stream: true });
+      assistantReply.content = streamed;
+      setMessages([...updatedMessages]); // force re-render
     }
+
+    setLoading(false);
+      setTimeout(async () => {
+    const res = await fetch("/api/follow-up", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reply: assistantReply.content }),
+    });
+
+    const follow = await res.json();
+
+    if (follow?.reply) {
+      setMessages((prev) => [...prev, { role: "assistant", content: follow.reply }]);
+    }
+
+    if (follow?.suggestions?.length) {
+      setSuggested(follow.suggestions.slice(0, 2));
+    }
+  }, 1000);
   };
+
 
   const handleSaveSession = async () => {
     if (!userId || messages.length < 2) return;
@@ -177,20 +167,14 @@ export default function Home() {
       body: JSON.stringify({ userId, messages, title }),
     });
   };
-
+  
   const handleStartNewChat = async () => {
     await handleSaveSession();
     const systemMessage: Message = {
       role: "system",
       content:
-        "Hi, I’m Neo — your AI financial assistant, backed by a human CFP®. Ask me anything to get started.",
+        "Hi, I’m Neo — your financial AI assistant, trained by a human CFP®. Ask me anything to get started.",
     };
-
-    await fetch("/api/save-conversation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, messages: [systemMessage] }),
-    });
 
     setMessages([systemMessage]);
     setSuggested([]);
@@ -201,7 +185,7 @@ export default function Home() {
 
   const handleLoadSession = async (sessionId: string) => {
     console.log("📦 Attempting to load session:", sessionId);
-    const res = await fetch(`/api/session?id=${sessionId}`);
+    const res = await fetch(`/api/load-session?id=${sessionId}`);
     const data = await res.json();
 
     if (Array.isArray(data?.messages) && data.messages.length > 0) {
@@ -285,10 +269,13 @@ export default function Home() {
             ))}
 
             {loading && (
-              <div className="text-sm text-gray-500 italic">Neo is thinking...</div>
+              <div className="flex items-center gap-1 text-sm text-gray-500 italic">
+                <span>Neo is typing</span>
+                <span className="dot-animation">.</span>
+                <span className="dot-animation delay-200">.</span>
+                <span className="dot-animation delay-400">.</span>
+              </div>
             )}
-            <div ref={bottomRef} />
-          </div>
 
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input

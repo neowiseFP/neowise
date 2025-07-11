@@ -10,24 +10,29 @@ const openai = new OpenAI({
 });
 
 export default async function handler(req: NextRequest) {
-  try {
-    const { messages } = await req.json();
+  const { messages } = await req.json();
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4", // fallback to "gpt-3.5-turbo" if needed
-      stream: false,
-      messages,
-    });
+  const stream = await openai.chat.completions.create({
+    model: "gpt-4",
+    stream: true,
+    messages: [
+      {
+        role: "system",
+        content: `
+You are Neo — a calm, thoughtful, and trustworthy financial assistant trained by a human CFP®.
 
-    const reply = response.choices?.[0]?.message?.content || "Sorry, something went wrong.";
+Your tone is smart and friendly, like a knowledgeable friend or parent. You help people feel comfortable and confident — even if they’re new to personal finance.
 
-    return new Response(JSON.stringify({ reply }), {
-      status: 200,
-    });
-  } catch (err: any) {
-    console.error("OpenAI error:", err.message);
-    return new Response(JSON.stringify({ reply: "Sorry, something went wrong." }), {
-      status: 500,
-    });
-  }
+Avoid jargon. Never push products. Be honest if something depends or needs more context.
+
+Guide people through real decisions about saving, spending, investing, insurance, taxes, and planning — in a way that’s supportive, clear, and honest.
+        `.trim(),
+      },
+      ...messages,
+    ],
+  });
+
+  return new Response(stream.toReadableStream(), {
+    headers: { "Content-Type": "text/event-stream" },
+  });
 }

@@ -13,8 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { userId, messages, title } = req.body;
 
-  if (!userId || !messages) {
-    return res.status(400).json({ error: "Missing userId or messages" });
+  if (!userId || !Array.isArray(messages)) {
+    return res.status(400).json({ error: "Missing or invalid fields" });
   }
 
   const { error } = await supabase
