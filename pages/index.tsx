@@ -210,7 +210,7 @@ export default function Home() {
       </Head>
       <div className="min-h-screen bg-gray-50 p-4 text-gray-900 font-sans">
         <h1 className="text-center text-2xl font-bold mb-1">
-          Neo — Your AI Financial Assistant
+          Neo — Your Financial AI Assistant
         </h1>
         <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
 
