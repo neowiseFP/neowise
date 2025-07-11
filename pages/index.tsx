@@ -231,7 +231,7 @@ export default function Home() {
         <h1 className="text-center text-2xl font-bold mb-1">
           Neo — Your Financial AI Assistant
         </h1>
-        <p className="text-center text-gray-600 mb-4">Ask questions. Get answers.</p>
+        <p className="text-center text-gray-600 mb-4">Your Financial Life: Smart insights, track your progress, and make confident decisions.</p>
 
         <div className="max-w-2xl mx-auto bg-white px-4 py-6 sm:px-6 rounded shadow">
           <div
