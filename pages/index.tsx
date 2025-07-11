@@ -168,7 +168,7 @@ export default function Home() {
       if (follow?.suggestions?.length) {
         setSuggested(follow.suggestions.slice(0, 2)); // ← this is critical
       }
-    }, 1500);
+    }, 200);
   };
 
   const handleSaveSession = async () => {
