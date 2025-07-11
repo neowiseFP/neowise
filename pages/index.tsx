@@ -343,7 +343,7 @@ export default function Home() {
           )}
 
           {suggested.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 mb-2">
+            <div className="flex flex-wrap gap-2 mt-2 mb-3">
               {suggested.map((q, i) => (
                 <button
                   key={i}
@@ -355,19 +355,6 @@ export default function Home() {
               ))}
             </div>
           )}
-
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything..."
-              className="flex-1 px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring"
-            />
-            <button type="submit" className="bg-black text-white px-4 py-2 rounded">
-              Send
-            </button>
-          </form>
           
           {showCategories && !selectedCategory && (
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
