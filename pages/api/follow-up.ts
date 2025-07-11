@@ -31,9 +31,25 @@ Respond as JSON:
   "reply": "short follow-up message",
   "suggestions": ["suggested question 1", "suggested question 2"]
 }
-          `.trim(),
+`.trim(),
         },
         {
           role: "user",
           content: reply,
         },
+      ],
+    });
+
+    const raw = completion.choices[0].message.content || "";
+
+    // Safely extract the JSON object from GPT output
+    const match = raw.match(/\{[\s\S]*?\}/);
+    if (!match) throw new Error("No JSON object found in GPT output");
+
+    const parsed = JSON.parse(match[0]);
+    res.status(200).json(parsed);
+  } catch (err) {
+    console.error("GPT follow-up error:", err);
+    res.status(500).json({ error: "Failed to generate follow-up" });
+  }
+}

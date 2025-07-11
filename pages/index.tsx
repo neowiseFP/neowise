@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
 
-// Define types
 type Message = {
   role: "user" | "assistant" | "system";
   content: string;
@@ -88,31 +87,27 @@ export default function Home() {
     }
   }, [messages, loading]);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!input.trim() || !userId) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || !userId) return;
 
-  const newMessages: Message[] = [
-    ...messages,
-    { role: "user", content: input },
-  ];
+    const newMessages: Message[] = [...messages, { role: "user", content: input }];
+    setMessages(newMessages);
+    setScrollOnNextMessage(true);
+    setShowHistory(false);
+    setInput("");
+    setLoading(true);
+    setSuggested([]);
 
-  setMessages(newMessages);
-  setScrollOnNextMessage(true);
-  setShowHistory(false);
-  setInput("");
-  setLoading(true);
-  setSuggested([]);
-
-  fetch("/api/question-log", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      question: input.trim(),
-      timestamp: new Date().toISOString(),
-      userId,
-    }),
-  });
+    fetch("/api/question-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: input.trim(),
+        timestamp: new Date().toISOString(),
+        userId,
+      }),
+    });
 
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -133,29 +128,29 @@ const handleSubmit = async (e: React.FormEvent) => {
       if (done) break;
       streamed += decoder.decode(value, { stream: true });
       assistantReply.content = streamed;
-      setMessages([...updatedMessages]); // force re-render
+      setMessages([...updatedMessages]);
     }
 
     setLoading(false);
-      setTimeout(async () => {
-    const res = await fetch("/api/follow-up", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reply: assistantReply.content }),
-    });
 
-    const follow = await res.json();
+    setTimeout(async () => {
+      const res = await fetch("/api/follow-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reply: assistantReply.content }),
+      });
 
-    if (follow?.reply) {
-      setMessages((prev) => [...prev, { role: "assistant", content: follow.reply }]);
-    }
+      const follow = await res.json();
 
-    if (follow?.suggestions?.length) {
-      setSuggested(follow.suggestions.slice(0, 2));
-    }
-  }, 1000);
+      if (follow?.reply) {
+        setMessages((prev) => [...prev, { role: "assistant", content: follow.reply }]);
+      }
+
+      if (follow?.suggestions?.length) {
+        setSuggested(follow.suggestions.slice(0, 2));
+      }
+    }, 1000);
   };
-
 
   const handleSaveSession = async () => {
     if (!userId || messages.length < 2) return;
@@ -167,7 +162,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       body: JSON.stringify({ userId, messages, title }),
     });
   };
-  
+
   const handleStartNewChat = async () => {
     await handleSaveSession();
     const systemMessage: Message = {
@@ -184,7 +179,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   const handleLoadSession = async (sessionId: string) => {
-    console.log("📦 Attempting to load session:", sessionId);
     const res = await fetch(`/api/load-session?id=${sessionId}`);
     const data = await res.json();
 
@@ -277,6 +271,9 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             )}
 
+            <div ref={bottomRef} />
+          </div>
+
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input
               type="text"
@@ -296,7 +293,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             </button>
             <button
               onClick={() => {
-                console.log("🕹️ Toggle View History clicked");
                 setShowHistory((prev) => !prev);
               }}
               className="underline"
@@ -304,8 +300,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               View History
             </button>
           </div>
-
-          {showHistory && sessions.length > 0 && (
+                    {showHistory && sessions.length > 0 && (
             <div className="mt-4 text-sm text-gray-600 border-t pt-4 max-w-2xl mx-auto">
               <div className="max-h-60 overflow-y-auto pr-1">
                 <ul className="space-y-2">
@@ -315,7 +310,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                         {new Date(session.updated_at).toLocaleString("en-US", {
                           dateStyle: "long",
                           timeStyle: "short",
-                        } as Intl.DateTimeFormatOptions)}
+                        })}
                       </span>
                       <div className="flex gap-2">
                         <button onClick={() => handleLoadSession(session.id)} className="underline">
@@ -346,7 +341,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           )}
 
-          {/* Categories */}
           {showCategories && !selectedCategory && (
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
               {Object.keys(categories).map((cat, i) => (
@@ -420,7 +414,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   );
 }
 
-// Modal Component
 function Modal({
   title,
   onClose,
@@ -443,7 +436,6 @@ function Modal({
   );
 }
 
-// Mortgage Calculator Component
 function MortgageCalculator() {
   const [price, setPrice] = useState("500000");
   const [down, setDown] = useState("100000");
@@ -468,9 +460,10 @@ function MortgageCalculator() {
     const r = parseRate(rate) / 100 / 12;
     const n = years * 12;
 
-    let m = loanType === "interest-only"
-      ? loan * r
-      : loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    let m =
+      loanType === "interest-only"
+        ? loan * r
+        : (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
     setMonthly(isFinite(m) ? m.toFixed(2) : "0.00");
   };
@@ -517,10 +510,7 @@ function MortgageCalculator() {
         placeholder="Interest Rate (%)"
       />
       <div className="text-sm text-gray-600">Estimated Term: {years} years</div>
-      <button
-        onClick={handleCalc}
-        className="w-full bg-blue-600 text-white py-2 rounded"
-      >
+      <button onClick={handleCalc} className="w-full bg-blue-600 text-white py-2 rounded">
         Calculate
       </button>
       <div className="text-center font-bold">
@@ -528,4 +518,4 @@ function MortgageCalculator() {
       </div>
     </div>
   );
-  }
+}         
