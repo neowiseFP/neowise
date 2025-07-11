@@ -32,7 +32,8 @@ Examples:
 
 Respond as JSON:
 {
-  "reply": "short follow-up message only"
+  "reply": "short follow-up message only",
+  "suggestions": ["suggested question 1", "suggested question 2"]
 }
           `.trim(),
         },
