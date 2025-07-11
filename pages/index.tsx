@@ -160,6 +160,8 @@ export default function Home() {
 
       const follow = await res.json();
 
+      console.log("📬 Follow-up response:", follow);
+
       if (follow?.reply) {
         setMessages((prev) => [...prev, { role: "assistant", content: follow.reply }]);
         setScrollOnNextMessage(true);
@@ -287,20 +289,21 @@ export default function Home() {
             )}
 
             <div ref={bottomRef} />
-          </div>
-          {suggested.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4 mb-2">
-            {suggested.map((q, i) => (
-              <button
-                key={i}
-                className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
-                onClick={() => setInput(q)}
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        )}
+            </div> {/* closes chat scroll area */}
+
+            {suggested.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4 mb-2">
+                {suggested.map((q, i) => (
+                  <button
+                    key={i}
+                    className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
+                    onClick={() => setInput(q)}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
 
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input
