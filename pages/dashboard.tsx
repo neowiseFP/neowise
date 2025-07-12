@@ -55,12 +55,10 @@ export default function Dashboard() {
       if (session) {
         setUser(session.user)
         setLoading(false)
-        // Clean up the magic link fragment if it exists
         if (window.location.hash) {
           window.history.replaceState({}, document.title, window.location.pathname)
         }
       } else {
-        // Retry once after delay to handle redirect timing
         setTimeout(async () => {
           const { data: retry } = await supabase.auth.getSession()
           if (retry.session) {
@@ -150,6 +148,26 @@ export default function Dashboard() {
             <Bar dataKey="spending" fill="#EF4444" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Smart Insights */}
+      <div className="mt-10 space-y-4">
+        <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
+        <div className="bg-white rounded-xl shadow p-4">
+          <p className="text-gray-700">
+            💡 You spent 22% more on dining out this month compared to last month.
+          </p>
+        </div>
+        <div className="bg-white rounded-xl shadow p-4">
+          <p className="text-gray-700">
+            💸 Subscriptions added up to $480 this month. Want to review them?
+          </p>
+        </div>
+        <div className="bg-white rounded-xl shadow p-4">
+          <p className="text-gray-700">
+            📈 Your savings rate this month is 33%. Keep it up!
+          </p>
+        </div>
       </div>
     </div>
   )

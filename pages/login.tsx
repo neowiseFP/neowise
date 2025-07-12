@@ -19,27 +19,32 @@ export default function Login() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4">Sign in to Neowise</h1>
-      {sent ? (
-        <p>Check your email for a magic link.</p>
-      ) : (
-        <div className="space-y-4">
-          <input
-            className="border p-2 w-64 rounded"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button
-            onClick={handleLogin}
-            className="bg-black text-white px-4 py-2 rounded"
-          >
-            Send Magic Link
-          </button>
-        </div>
-      )}
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">🔐 Sign in to Neowise</h1>
+
+        {sent ? (
+          <div className="text-center text-green-600">
+            ✅ Check your email for a magic link.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <input
+              className="w-full border rounded px-3 py-2"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button
+              onClick={handleLogin}
+              className="w-full bg-black text-white py-2 rounded hover:bg-gray-900 transition"
+            >
+              Send Magic Link
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
