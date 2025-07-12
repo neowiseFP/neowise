@@ -145,15 +145,7 @@ export default function Dashboard() {
     <div className="bg-white rounded-xl shadow p-6 mb-8 outline-none focus:outline-none">
       <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart
-          data={chartData}
-          onClick={(data) => {
-            if ('activeLabel' in data && typeof data.activeLabel === 'string') {
-              const clickedIndex = chartData.findIndex((m) => m.month === data.activeLabel)
-              if (clickedIndex !== -1) setSelectedMonthIndex(clickedIndex)
-            }
-          }}
-        >
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
@@ -163,6 +155,7 @@ export default function Dashboard() {
               <Cell
                 key={`income-${i}`}
                 fill={i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
+                onClick={() => setSelectedMonthIndex(i)}
               />
             ))}
           </Bar>
@@ -171,6 +164,7 @@ export default function Dashboard() {
               <Cell
                 key={`spending-${i}`}
                 fill={i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
+                onClick={() => setSelectedMonthIndex(i)}
               />
             ))}
           </Bar>
