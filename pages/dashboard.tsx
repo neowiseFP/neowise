@@ -20,7 +20,6 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>('monthly')
   const router = useRouter()
 
-  // Fake financial data
   const mockData = {
     monthly: [
       { name: 'Jan', income: 7200, spending: 4800 },
@@ -76,10 +75,21 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
         <div>
           <h1 className="text-2xl font-bold">👋 Welcome to your Dashboard</h1>
-          <p className="text-gray-600">Logged in as: <strong>{user?.email}</strong></p>
+          <p className="text-gray-600">
+            Logged in as: <strong>{user?.email}</strong>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut()
+                router.push('/login')
+              }}
+              className="ml-4 px-3 py-1 rounded-md text-sm font-medium border bg-white text-black hover:bg-gray-100"
+            >
+              Log out
+            </button>
+          </p>
         </div>
         <div className="space-x-2">
           {['weekly', 'monthly'].map((mode) => (

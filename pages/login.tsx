@@ -7,7 +7,13 @@ export default function Login() {
   const [sent, setSent] = useState(false)
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: 'http://localhost:3000/dashboard',
+      },
+    })
+
     if (!error) setSent(true)
     else alert(error.message)
   }

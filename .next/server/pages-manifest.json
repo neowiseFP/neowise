@@ -3,7 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/login": "pages/login.js",
-  "/api/load-sessions": "pages/api/load-sessions.js",
-  "/": "pages/index.js",
   "/dashboard": "pages/dashboard.js"
 }
