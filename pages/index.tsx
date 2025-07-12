@@ -229,7 +229,7 @@ export default function Home() {
         {/* Open Graph (for iMessage, Slack, LinkedIn, etc.) */}
         <meta property="og:title" content="Your Financial Assistant – Neo" />
         <meta property="og:description" content="Neo is your trusted financial assistant, powered by AI and trained by a CFP®. Get honest, smart guidance for every money decision — anytime you need it." />
-        <meta property="og:image" content="https://neowise.io/images/neo-preview.png" />
+        <meta property="og:image" content="https://neowise.io/images/neo-preview-v2.png" />
         <meta property="og:url" content="https://neowise.io" />
         <meta property="og:type" content="website" />
 
@@ -237,7 +237,7 @@ export default function Home() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Your Financial Assistant – Neo" />
         <meta name="twitter:description" content="Neo is your trusted financial assistant, powered by AI and trained by a CFP®. Get honest, smart guidance for every money decision — anytime you need it." />
-        <meta name="twitter:image" content="https://neowise.io/images/neo-preview.png" />
+        <meta name="twitter:image" content="https://neowise.io/images/neo-preview-v2.png" />
       </Head>
       <div className="min-h-screen bg-gray-50 p-4 text-gray-900 font-sans">
         <h1 className="text-center text-2xl font-bold mb-1">
