@@ -12,12 +12,13 @@ import {
   CartesianGrid,
 } from 'recharts'
 
-type ViewMode = 'monthly' | 'ytd'
+type ViewMode = 'weekly' | 'monthly' | '3month' | 'ytd' | 'annual' | 'custom'
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('monthly')
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState<number>(5)
   const router = useRouter()
 
   const realisticMonthlyData = [
@@ -29,9 +30,9 @@ export default function Dashboard() {
     { month: 'Jun', income: 7600, spending: 5450 },
   ]
 
-  const currentMonth = realisticMonthlyData[5] // June
-  const saved = currentMonth.income - currentMonth.spending
-  const savingsRate = Math.round((saved / currentMonth.income) * 100)
+  const selectedMonth = realisticMonthlyData[selectedMonthIndex]
+  const saved = selectedMonth.income - selectedMonth.spending
+  const savingsRate = Math.round((saved / selectedMonth.income) * 100)
 
   const ytd = realisticMonthlyData.reduce(
     (acc, m) => {
@@ -102,7 +103,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="space-x-2">
-          {['monthly', 'ytd'].map((mode) => (
+          {['weekly', 'monthly', '3month', 'ytd', 'annual', 'custom'].map((mode) => (
             <button
               key={mode}
               className={`px-3 py-1 rounded-md text-sm font-medium border ${
@@ -118,22 +119,22 @@ export default function Dashboard() {
 
       {/* Summary */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">
-        {viewMode === 'monthly' ? (
-          <div>
-            <h2 className="text-lg font-semibold mb-2">📅 June Summary</h2>
-            <p className="text-gray-800">
-              Income: <strong>${currentMonth.income.toLocaleString()}</strong> — Spending:{' '}
-              <strong>${currentMonth.spending.toLocaleString()}</strong> — Saved:{' '}
-              <strong className="text-green-600">${saved.toLocaleString()} ({savingsRate}%)</strong>
-            </p>
-          </div>
-        ) : (
+        {viewMode === 'ytd' ? (
           <div>
             <h2 className="text-lg font-semibold mb-2">📆 YTD Summary</h2>
             <p className="text-gray-800">
               Income: <strong>${ytd.income.toLocaleString()}</strong> — Spending:{' '}
               <strong>${ytd.spending.toLocaleString()}</strong> — Saved:{' '}
               <strong className="text-green-600">${ytdSaved.toLocaleString()} ({ytdRate}%)</strong>
+            </p>
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">📅 {selectedMonth.month} Summary</h2>
+            <p className="text-gray-800">
+              Income: <strong>${selectedMonth.income.toLocaleString()}</strong> — Spending:{' '}
+              <strong>${selectedMonth.spending.toLocaleString()}</strong> — Saved:{' '}
+              <strong className="text-green-600">${saved.toLocaleString()} ({savingsRate}%)</strong>
             </p>
           </div>
         )}
@@ -159,20 +160,70 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            ✅ You're saving <strong>{savingsRate}%</strong> of your income this month — up from 27%
-            last month.
+            ✅ You saved <strong>{savingsRate}%</strong> of your income in {selectedMonth.month}.
           </p>
         </div>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            💸 Subscriptions hit <strong>$480</strong> this month — trending up.
+            💡 Spending patterns in {selectedMonth.month} suggest dining and travel were high. We'll add category breakdowns soon.
           </p>
         </div>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            📈 You've saved <strong>${ytdSaved.toLocaleString()}</strong> YTD. You're on pace to save
-            over <strong>${Math.round((ytdSaved / 6) * 12).toLocaleString()}</strong> by year end.
+            📈 You're trending above your YTD savings goal if this pace continues.
           </p>
+        </div>
+      </div>
+
+      {/* Monthly Breakdown */}
+      <div className="mt-12">
+        <h2 className="text-lg font-semibold mb-4">📅 Monthly Breakdown</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left border rounded-xl overflow-hidden">
+            <thead className="bg-gray-100 text-gray-700">
+              <tr>
+                <th className="px-4 py-2">Month</th>
+                <th className="px-4 py-2">Income</th>
+                <th className="px-4 py-2">Spending</th>
+                <th className="px-4 py-2">Saved</th>
+                <th className="px-4 py-2">Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {realisticMonthlyData.map((m, i) => {
+                const saved = m.income - m.spending
+                const rate = Math.round((saved / m.income) * 100)
+                const prev = i > 0 ? realisticMonthlyData[i - 1] : null
+                const prevSaved = prev ? prev.income - prev.spending : null
+                const trend = !prevSaved
+                  ? null
+                  : saved > prevSaved
+                  ? 'up'
+                  : saved < prevSaved
+                  ? 'down'
+                  : 'flat'
+                const arrow = trend === 'up' ? '🔺' : trend === 'down' ? '🔻' : '➖'
+
+                return (
+                  <tr
+                    key={m.month}
+                    onClick={() => setSelectedMonthIndex(i)}
+                    className={`border-t hover:bg-gray-50 cursor-pointer ${
+                      i === selectedMonthIndex ? 'bg-indigo-50 font-semibold' : ''
+                    }`}
+                  >
+                    <td className="px-4 py-2 font-medium">{m.month}</td>
+                    <td className="px-4 py-2">${m.income.toLocaleString()}</td>
+                    <td className="px-4 py-2">${m.spending.toLocaleString()}</td>
+                    <td className="px-4 py-2 text-green-600">
+                      ${saved.toLocaleString()} <span className="ml-1">{arrow}</span>
+                    </td>
+                    <td className="px-4 py-2">{rate}%</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
