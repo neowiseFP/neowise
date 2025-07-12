@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  Cell,
 } from 'recharts'
 
 type ViewMode = 'weekly' | 'monthly' | '3month' | 'ytd' | 'annual' | 'custom'
@@ -45,10 +46,10 @@ export default function Dashboard() {
   const ytdSaved = ytd.income - ytd.spending
   const ytdRate = Math.round((ytdSaved / ytd.income) * 100)
 
-  const chartData = realisticMonthlyData.map((m) => ({
+  const chartData = realisticMonthlyData.map((m, i) => ({
+    ...m,
     name: m.month,
-    income: m.income,
-    spending: m.spending,
+    index: i,
   }))
 
   useEffect(() => {
@@ -144,13 +145,32 @@ export default function Dashboard() {
       <div className="bg-white rounded-xl shadow p-6 mb-8">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
+          <BarChart data={chartData} onClick={(data) => {
+            if ('activeLabel' in data && typeof data.activeLabel === 'string') {
+              const clickedIndex = chartData.findIndex((m) => m.month === data.activeLabel)
+              if (clickedIndex !== -1) setSelectedMonthIndex(clickedIndex)
+            }
+          }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="income" fill="#22C55E" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="spending" fill="#EF4444" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="income">
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`income-${index}`}
+                  fill={index === selectedMonthIndex ? '#16a34a' : '#22C55E'}
+                />
+              ))}
+            </Bar>
+            <Bar dataKey="spending">
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`spending-${index}`}
+                  fill={index === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
+                />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -172,58 +192,6 @@ export default function Dashboard() {
           <p className="text-gray-700">
             📈 You're trending above your YTD savings goal if this pace continues.
           </p>
-        </div>
-      </div>
-
-      {/* Monthly Breakdown */}
-      <div className="mt-12">
-        <h2 className="text-lg font-semibold mb-4">📅 Monthly Breakdown</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left border rounded-xl overflow-hidden">
-            <thead className="bg-gray-100 text-gray-700">
-              <tr>
-                <th className="px-4 py-2">Month</th>
-                <th className="px-4 py-2">Income</th>
-                <th className="px-4 py-2">Spending</th>
-                <th className="px-4 py-2">Saved</th>
-                <th className="px-4 py-2">Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {realisticMonthlyData.map((m, i) => {
-                const saved = m.income - m.spending
-                const rate = Math.round((saved / m.income) * 100)
-                const prev = i > 0 ? realisticMonthlyData[i - 1] : null
-                const prevSaved = prev ? prev.income - prev.spending : null
-                const trend = !prevSaved
-                  ? null
-                  : saved > prevSaved
-                  ? 'up'
-                  : saved < prevSaved
-                  ? 'down'
-                  : 'flat'
-                const arrow = trend === 'up' ? '🔺' : trend === 'down' ? '🔻' : '➖'
-
-                return (
-                  <tr
-                    key={m.month}
-                    onClick={() => setSelectedMonthIndex(i)}
-                    className={`border-t hover:bg-gray-50 cursor-pointer ${
-                      i === selectedMonthIndex ? 'bg-indigo-50 font-semibold' : ''
-                    }`}
-                  >
-                    <td className="px-4 py-2 font-medium">{m.month}</td>
-                    <td className="px-4 py-2">${m.income.toLocaleString()}</td>
-                    <td className="px-4 py-2">${m.spending.toLocaleString()}</td>
-                    <td className="px-4 py-2 text-green-600">
-                      ${saved.toLocaleString()} <span className="ml-1">{arrow}</span>
-                    </td>
-                    <td className="px-4 py-2">{rate}%</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
