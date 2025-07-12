@@ -12,7 +12,7 @@ import {
   CartesianGrid,
 } from 'recharts'
 
-type ViewMode = 'weekly' | 'monthly'
+type ViewMode = 'monthly' | 'ytd'
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true)
@@ -20,31 +20,35 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>('monthly')
   const router = useRouter()
 
-  const mockData = {
-    monthly: [
-      { name: 'Jan', income: 7200, spending: 4800 },
-      { name: 'Feb', income: 7100, spending: 5000 },
-      { name: 'Mar', income: 7300, spending: 5100 },
-      { name: 'Apr', income: 7500, spending: 5200 },
-      { name: 'May', income: 7600, spending: 5250 },
-      { name: 'Jun', income: 7400, spending: 5300 },
-    ],
-    weekly: [
-      { name: 'Week 1', income: 1800, spending: 1200 },
-      { name: 'Week 2', income: 1700, spending: 1300 },
-      { name: 'Week 3', income: 1900, spending: 1250 },
-      { name: 'Week 4', income: 1800, spending: 1350 },
-    ],
-  }
-
-  const netWorthHistory = [
-    { name: 'Jan', net: 112000 },
-    { name: 'Feb', net: 115000 },
-    { name: 'Mar', net: 118500 },
-    { name: 'Apr', net: 121000 },
-    { name: 'May', net: 124000 },
-    { name: 'Jun', net: 128000 },
+  const realisticMonthlyData = [
+    { month: 'Jan', income: 7400, spending: 5200 },
+    { month: 'Feb', income: 7500, spending: 5300 },
+    { month: 'Mar', income: 7300, spending: 5100 },
+    { month: 'Apr', income: 7600, spending: 5400 },
+    { month: 'May', income: 7800, spending: 5600 },
+    { month: 'Jun', income: 7600, spending: 5450 },
   ]
+
+  const currentMonth = realisticMonthlyData[5] // June
+  const saved = currentMonth.income - currentMonth.spending
+  const savingsRate = Math.round((saved / currentMonth.income) * 100)
+
+  const ytd = realisticMonthlyData.reduce(
+    (acc, m) => {
+      acc.income += m.income
+      acc.spending += m.spending
+      return acc
+    },
+    { income: 0, spending: 0 }
+  )
+  const ytdSaved = ytd.income - ytd.spending
+  const ytdRate = Math.round((ytdSaved / ytd.income) * 100)
+
+  const chartData = realisticMonthlyData.map((m) => ({
+    name: m.month,
+    income: m.income,
+    spending: m.spending,
+  }))
 
   useEffect(() => {
     const checkSession = async () => {
@@ -98,7 +102,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="space-x-2">
-          {['weekly', 'monthly'].map((mode) => (
+          {['monthly', 'ytd'].map((mode) => (
             <button
               key={mode}
               className={`px-3 py-1 rounded-md text-sm font-medium border ${
@@ -106,40 +110,40 @@ export default function Dashboard() {
               }`}
               onClick={() => setViewMode(mode as ViewMode)}
             >
-              {mode[0].toUpperCase() + mode.slice(1)}
+              {mode.toUpperCase()}
             </button>
           ))}
         </div>
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow p-4">
-          <h2 className="font-semibold text-sm text-gray-500 mb-1">You Saved</h2>
-          <p className="text-2xl font-bold text-green-600">
-            ${viewMode === 'monthly' ? 2400 : 600}
-          </p>
-          <p className="text-sm text-gray-500">Nice work this {viewMode} 💪</p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-4 col-span-2">
-          <h2 className="font-semibold text-sm text-gray-500 mb-1">Net Worth</h2>
-          <p className="text-lg font-medium mb-2">$128,000</p>
-          <ResponsiveContainer width="100%" height={120}>
-            <BarChart data={netWorthHistory}>
-              <XAxis dataKey="name" />
-              <YAxis hide />
-              <Tooltip />
-              <Bar dataKey="net" fill="#4F46E5" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="bg-white rounded-xl shadow p-6 mb-6">
+        {viewMode === 'monthly' ? (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">📅 June Summary</h2>
+            <p className="text-gray-800">
+              Income: <strong>${currentMonth.income.toLocaleString()}</strong> — Spending:{' '}
+              <strong>${currentMonth.spending.toLocaleString()}</strong> — Saved:{' '}
+              <strong className="text-green-600">${saved.toLocaleString()} ({savingsRate}%)</strong>
+            </p>
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">📆 YTD Summary</h2>
+            <p className="text-gray-800">
+              Income: <strong>${ytd.income.toLocaleString()}</strong> — Spending:{' '}
+              <strong>${ytd.spending.toLocaleString()}</strong> — Saved:{' '}
+              <strong className="text-green-600">${ytdSaved.toLocaleString()} ({ytdRate}%)</strong>
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Cash Flow Bar Chart */}
-      <div className="bg-white rounded-xl shadow p-4">
-        <h2 className="font-semibold text-lg mb-4">💵 Cash Flow ({viewMode})</h2>
+      {/* Cash Flow Chart */}
+      <div className="bg-white rounded-xl shadow p-6 mb-8">
+        <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={mockData[viewMode]}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
@@ -151,21 +155,23 @@ export default function Dashboard() {
       </div>
 
       {/* Smart Insights */}
-      <div className="mt-10 space-y-4">
+      <div className="space-y-4">
         <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            💡 You spent 22% more on dining out this month compared to last month.
+            ✅ You're saving <strong>{savingsRate}%</strong> of your income this month — up from 27%
+            last month.
           </p>
         </div>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            💸 Subscriptions added up to $480 this month. Want to review them?
+            💸 Subscriptions hit <strong>$480</strong> this month — trending up.
           </p>
         </div>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            📈 Your savings rate this month is 33%. Keep it up!
+            📈 You've saved <strong>${ytdSaved.toLocaleString()}</strong> YTD. You're on pace to save
+            over <strong>${Math.round((ytdSaved / 6) * 12).toLocaleString()}</strong> by year end.
           </p>
         </div>
       </div>
