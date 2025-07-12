@@ -141,39 +141,42 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Cash Flow Chart */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
-        <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData} onClick={(data) => {
+    {/* Cash Flow Chart */}
+    <div className="bg-white rounded-xl shadow p-6 mb-8 outline-none focus:outline-none">
+      <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart
+          data={chartData}
+          onClick={(data) => {
             if ('activeLabel' in data && typeof data.activeLabel === 'string') {
               const clickedIndex = chartData.findIndex((m) => m.month === data.activeLabel)
               if (clickedIndex !== -1) setSelectedMonthIndex(clickedIndex)
             }
-          }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="income">
-              {chartData.map((entry, index) => (
-                <Cell
-                  key={`income-${index}`}
-                  fill={index === selectedMonthIndex ? '#16a34a' : '#22C55E'}
-                />
-              ))}
-            </Bar>
-            <Bar dataKey="spending">
-              {chartData.map((entry, index) => (
-                <Cell
-                  key={`spending-${index}`}
-                  fill={index === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="income">
+            {chartData.map((_, i) => (
+              <Cell
+                key={`income-${i}`}
+                fill={i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
+              />
+            ))}
+          </Bar>
+          <Bar dataKey="spending">
+            {chartData.map((_, i) => (
+              <Cell
+                key={`spending-${i}`}
+                fill={i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
 
       {/* Smart Insights */}
       <div className="space-y-4">
