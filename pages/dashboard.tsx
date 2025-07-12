@@ -20,6 +20,8 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('monthly')
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number>(5)
+  const [customStart, setCustomStart] = useState<number>(0)
+  const [customEnd, setCustomEnd] = useState<number>(5)
   const router = useRouter()
 
   const realisticMonthlyData = [
@@ -31,27 +33,35 @@ export default function Dashboard() {
     { month: 'Jun', income: 7600, spending: 5450 },
   ]
 
-  const selectedMonth = realisticMonthlyData[selectedMonthIndex]
-  const saved = selectedMonth.income - selectedMonth.spending
-  const savingsRate = Math.round((saved / selectedMonth.income) * 100)
+  const getRange = (start: number, end: number) =>
+    realisticMonthlyData.slice(start, end + 1)
 
-  const ytd = realisticMonthlyData.reduce(
-    (acc, m) => {
-      acc.income += m.income
-      acc.spending += m.spending
-      return acc
-    },
-    { income: 0, spending: 0 }
-  )
-  const ytdSaved = ytd.income - ytd.spending
-  const ytdRate = Math.round((ytdSaved / ytd.income) * 100)
+  const selectedRange =
+    viewMode === 'custom'
+      ? getRange(customStart, customEnd)
+      : viewMode === '3month'
+      ? realisticMonthlyData.slice(-3)
+      : viewMode === 'weekly'
+      ? [
+          { month: 'Week 1', income: 1800, spending: 1200 },
+          { month: 'Week 2', income: 1700, spending: 1300 },
+          { month: 'Week 3', income: 1900, spending: 1250 },
+          { month: 'Week 4', income: 1800, spending: 1350 },
+        ]
+      : viewMode === 'annual'
+      ? realisticMonthlyData
+      : [realisticMonthlyData[selectedMonthIndex]]
 
-  const chartData = realisticMonthlyData.map((m, i) => ({
+  const rangeIncome = selectedRange.reduce((sum, m) => sum + m.income, 0)
+  const rangeSpending = selectedRange.reduce((sum, m) => sum + m.spending, 0)
+  const rangeSaved = rangeIncome - rangeSpending
+  const rangeRate = Math.round((rangeSaved / rangeIncome) * 100)
+
+  const chartData = selectedRange.map((m, i) => ({
     ...m,
     name: m.month,
     index: i,
   }))
-
   useEffect(() => {
     const checkSession = async () => {
       const {
@@ -118,76 +128,124 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Custom Date Range Selector */}
+      {viewMode === 'custom' && (
+        <div className="mb-6 flex gap-4 items-center">
+          <label>
+            Start:
+            <select
+              className="ml-2 border rounded px-2 py-1"
+              value={customStart}
+              onChange={(e) => setCustomStart(Number(e.target.value))}
+            >
+              {realisticMonthlyData.map((m, i) => (
+                <option key={m.month} value={i}>
+                  {m.month}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            End:
+            <select
+              className="ml-2 border rounded px-2 py-1"
+              value={customEnd}
+              onChange={(e) => setCustomEnd(Number(e.target.value))}
+            >
+              {realisticMonthlyData.map((m, i) => (
+                <option key={m.month} value={i}>
+                  {m.month}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
+
       {/* Summary */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">
-        {viewMode === 'ytd' ? (
-          <div>
-            <h2 className="text-lg font-semibold mb-2">📆 YTD Summary</h2>
-            <p className="text-gray-800">
-              Income: <strong>${ytd.income.toLocaleString()}</strong> — Spending:{' '}
-              <strong>${ytd.spending.toLocaleString()}</strong> — Saved:{' '}
-              <strong className="text-green-600">${ytdSaved.toLocaleString()} ({ytdRate}%)</strong>
-            </p>
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-lg font-semibold mb-2">📅 {selectedMonth.month} Summary</h2>
-            <p className="text-gray-800">
-              Income: <strong>${selectedMonth.income.toLocaleString()}</strong> — Spending:{' '}
-              <strong>${selectedMonth.spending.toLocaleString()}</strong> — Saved:{' '}
-              <strong className="text-green-600">${saved.toLocaleString()} ({savingsRate}%)</strong>
-            </p>
-          </div>
-        )}
+        <h2 className="text-lg font-semibold mb-2">
+          {viewMode === 'ytd'
+            ? '📆 YTD Summary'
+            : viewMode === 'custom'
+            ? `🗓 Custom Summary (${realisticMonthlyData[customStart].month} to ${realisticMonthlyData[customEnd].month})`
+            : viewMode === '3month'
+            ? '📉 Last 3 Months'
+            : viewMode === 'annual'
+            ? '📆 Annual Summary'
+            : viewMode === 'weekly'
+            ? '🗓 Last 4 Weeks'
+            : `📅 ${realisticMonthlyData[selectedMonthIndex].month} Summary`}
+        </h2>
+        <p className="text-gray-800">
+          Income: <strong>${rangeIncome.toLocaleString()}</strong> — Spending:{' '}
+          <strong>${rangeSpending.toLocaleString()}</strong> — Saved:{' '}
+          <strong className="text-green-600">
+            ${rangeSaved.toLocaleString()} ({rangeRate}%)
+          </strong>
+        </p>
       </div>
 
-    {/* Cash Flow Chart */}
-    <div className="bg-white rounded-xl shadow p-6 mb-8 outline-none focus:outline-none">
-      <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="income">
-            {chartData.map((_, i) => (
-              <Cell
-                key={`income-${i}`}
-                fill={i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
-                onClick={() => setSelectedMonthIndex(i)}
-              />
-            ))}
-          </Bar>
-          <Bar dataKey="spending">
-            {chartData.map((_, i) => (
-              <Cell
-                key={`spending-${i}`}
-                fill={i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
-                onClick={() => setSelectedMonthIndex(i)}
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+      {/* Chart */}
+      <div className="bg-white rounded-xl shadow p-6 mb-8 outline-none focus:outline-none">
+        <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="income">
+              {chartData.map((_, i) => (
+                <Cell
+                  key={`income-${i}`}
+                  fill={
+                    viewMode === 'monthly' && i === selectedMonthIndex
+                      ? '#16a34a'
+                      : '#22C55E'
+                  }
+                  onClick={
+                    viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined
+                  }
+                />
+              ))}
+            </Bar>
+            <Bar dataKey="spending">
+              {chartData.map((_, i) => (
+                <Cell
+                  key={`spending-${i}`}
+                  fill={
+                    viewMode === 'monthly' && i === selectedMonthIndex
+                      ? '#b91c1c'
+                      : '#EF4444'
+                  }
+                  onClick={
+                    viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined
+                  }
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Smart Insights */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            ✅ You saved <strong>{savingsRate}%</strong> of your income in {selectedMonth.month}.
+            ✅ You saved <strong>{rangeRate}%</strong> of your income during this period.
           </p>
         </div>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            💡 Spending patterns in {selectedMonth.month} suggest dining and travel were high. We'll add category breakdowns soon.
+            💡 Spending appears consistent, but we’ll surface trends as we analyze categories.
           </p>
         </div>
         <div className="bg-white rounded-xl shadow p-4">
           <p className="text-gray-700">
-            📈 You're trending above your YTD savings goal if this pace continues.
+            📈 Your total savings for this range is{' '}
+            <strong>${rangeSaved.toLocaleString()}</strong>.
           </p>
         </div>
       </div>
