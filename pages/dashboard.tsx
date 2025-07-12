@@ -55,12 +55,20 @@ export default function Dashboard() {
       if (session) {
         setUser(session.user)
         setLoading(false)
+        // Clean up the magic link fragment if it exists
+        if (window.location.hash) {
+          window.history.replaceState({}, document.title, window.location.pathname)
+        }
       } else {
+        // Retry once after delay to handle redirect timing
         setTimeout(async () => {
           const { data: retry } = await supabase.auth.getSession()
           if (retry.session) {
             setUser(retry.session.user)
             setLoading(false)
+            if (window.location.hash) {
+              window.history.replaceState({}, document.title, window.location.pathname)
+            }
           } else {
             router.push('/login')
           }
