@@ -339,7 +339,8 @@ export default function Dashboard() {
                   </span>
                   <div className="text-right">
                     <div className="font-medium">
-                      ${item.amount.toLocaleString()} <span className="text-sm text-gray-500">({percent}%)</span>
+                      ${item.amount.toLocaleString()}{' '}
+                      <span className="text-sm text-gray-500">({percent}%)</span>
                     </div>
                     {changeText && change !== null && (
                       <div className={`text-sm ${change > 0 ? 'text-red-500' : change < 0 ? 'text-green-600' : 'text-gray-400'}`}>
