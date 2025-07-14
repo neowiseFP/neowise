@@ -25,6 +25,15 @@ export default function Dashboard() {
   const router = useRouter()
   const [goalAmount, setGoalAmount] = useState<number>(20000)
 
+  const realisticMonthlyData = [
+    { month: 'Jan', income: 7400, spending: 5200 },
+    { month: 'Feb', income: 7500, spending: 5300 },
+    { month: 'Mar', income: 7300, spending: 5100 },
+    { month: 'Apr', income: 7600, spending: 5400 },
+    { month: 'May', income: 7800, spending: 5600 },
+    { month: 'Jun', income: 7600, spending: 5450 },
+  ]
+
   const categoryData: Record<string, { category: string; amount: number; note?: string }[]> = {
     Jan: [
       { category: 'Rent', amount: 2100 },
@@ -58,58 +67,37 @@ export default function Dashboard() {
     ],
   }
 
-    function generateInsights(currentIndex: number) {
-      const current = realisticMonthlyData[currentIndex]
-      const prev = realisticMonthlyData[currentIndex - 1]
+  function generateInsights(currentIndex: number) {
+    const current = realisticMonthlyData[currentIndex]
+    const prev = realisticMonthlyData[currentIndex - 1]
+    if (!current || !prev) return []
 
-      if (!current || !prev) return []
+    const insights = []
+    const savedCurrent = current.income - current.spending
+    const savedPrev = prev.income - prev.spending
+    const savingsDiff = savedCurrent - savedPrev
+    const rateCurrent = Math.round((savedCurrent / current.income) * 100)
+    const ratePrev = Math.round((savedPrev / prev.income) * 100)
 
-      const insights = []
-
-      const savedCurrent = current.income - current.spending
-      const savedPrev = prev.income - prev.spending
-      const savingsDiff = savedCurrent - savedPrev
-      const rateCurrent = Math.round((savedCurrent / current.income) * 100)
-      const ratePrev = Math.round((savedPrev / prev.income) * 100)
-
-      if (savingsDiff > 0) {
-        insights.push(
-          `✅ You saved $${savingsDiff.toLocaleString()} more than in ${prev.month}. Great work!`
-        )
-      } else if (savingsDiff < 0) {
-        insights.push(
-          `⚠️ You saved $${Math.abs(savingsDiff).toLocaleString()} less than in ${prev.month}. Want to review spending?`
-        )
-      }
-
-      if (rateCurrent > ratePrev) {
-        insights.push(
-          `📈 Your savings rate improved to ${rateCurrent}% (up from ${ratePrev}%).`
-        )
-      } else if (rateCurrent < ratePrev) {
-        insights.push(
-          `📉 Your savings rate dropped to ${rateCurrent}% (was ${ratePrev}%).`
-        )
-      }
-
-      if (categoryData[current.month]) {
-        const travel = categoryData[current.month].find((c) => c.category === 'Travel')
-        if (travel && travel.amount > 2000) {
-          insights.push(`✈️ Travel spending was high at $${travel.amount.toLocaleString()} — consider budgeting next month.`)
-        }
-      }
-
-      return insights
+    if (savingsDiff > 0) {
+      insights.push(`✅ You saved $${savingsDiff.toLocaleString()} more than in ${prev.month}. Great work!`)
+    } else if (savingsDiff < 0) {
+      insights.push(`⚠️ You saved $${Math.abs(savingsDiff).toLocaleString()} less than in ${prev.month}. Want to review spending?`)
     }
 
-  const realisticMonthlyData = [
-    { month: 'Jan', income: 7400, spending: 5200 },
-    { month: 'Feb', income: 7500, spending: 5300 },
-    { month: 'Mar', income: 7300, spending: 5100 },
-    { month: 'Apr', income: 7600, spending: 5400 },
-    { month: 'May', income: 7800, spending: 5600 },
-    { month: 'Jun', income: 7600, spending: 5450 },
-  ]
+    if (rateCurrent > ratePrev) {
+      insights.push(`📈 Your savings rate improved to ${rateCurrent}% (up from ${ratePrev}%).`)
+    } else if (rateCurrent < ratePrev) {
+      insights.push(`📉 Your savings rate dropped to ${rateCurrent}% (was ${ratePrev}%).`)
+    }
+
+    const travel = categoryData[current.month]?.find((c) => c.category === 'Travel')
+    if (travel && travel.amount > 2000) {
+      insights.push(`✈️ Travel spending was high at $${travel.amount.toLocaleString()} — consider budgeting next month.`)
+    }
+
+    return insights
+  }
 
   const ytd = realisticMonthlyData.reduce(
     (acc, m) => {
@@ -123,8 +111,7 @@ export default function Dashboard() {
   const ytdRate = Math.round((ytdSaved / ytd.income) * 100)
   const goalPercent = Math.min(Math.round((ytdSaved / goalAmount) * 100), 100)
 
-  const getRange = (start: number, end: number) =>
-    realisticMonthlyData.slice(start, end + 1)
+  const getRange = (start: number, end: number) => realisticMonthlyData.slice(start, end + 1)
 
   const selectedRange =
     viewMode === 'custom'
@@ -132,7 +119,7 @@ export default function Dashboard() {
       : viewMode === '3month'
       ? realisticMonthlyData.slice(-3)
       : viewMode === 'weekly'
-      ? [ /* mock weekly data */ ]
+      ? []
       : viewMode === 'ytd'
       ? realisticMonthlyData.slice(0, selectedMonthIndex + 1)
       : viewMode === 'annual'
@@ -149,12 +136,10 @@ export default function Dashboard() {
     name: m.month,
     index: i,
   }))
+
   useEffect(() => {
     const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
+      const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         setUser(session.user)
         setLoading(false)
@@ -184,6 +169,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header + View Mode Selector */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
         <div>
           <h1 className="text-2xl font-bold">👋 Welcome to your Dashboard</h1>
@@ -215,7 +201,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Custom Date Range Selector */}
+      {/* Custom Date Picker */}
       {viewMode === 'custom' && (
         <div className="mb-6 flex gap-4 items-center">
           <label>
@@ -226,9 +212,7 @@ export default function Dashboard() {
               onChange={(e) => setCustomStart(Number(e.target.value))}
             >
               {realisticMonthlyData.map((m, i) => (
-                <option key={m.month} value={i}>
-                  {m.month}
-                </option>
+                <option key={m.month} value={i}>{m.month}</option>
               ))}
             </select>
           </label>
@@ -240,9 +224,7 @@ export default function Dashboard() {
               onChange={(e) => setCustomEnd(Number(e.target.value))}
             >
               {realisticMonthlyData.map((m, i) => (
-                <option key={m.month} value={i}>
-                  {m.month}
-                </option>
+                <option key={m.month} value={i}>{m.month}</option>
               ))}
             </select>
           </label>
@@ -316,7 +298,7 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Savings Goal Tracker */}
+      {/* Savings Goal */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">
         <h2 className="text-lg font-semibold mb-2">🎯 Savings Goal</h2>
         <p className="text-gray-800 mb-2">
@@ -324,14 +306,12 @@ export default function Dashboard() {
           <strong>${goalAmount.toLocaleString()}</strong> goal —{' '}
           <span className="text-green-600 font-semibold">{goalPercent}% complete</span>
         </p>
-
         <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
           <div
             className="h-full bg-green-500 transition-all duration-300 ease-in-out"
             style={{ width: `${goalPercent}%` }}
           ></div>
         </div>
-
         <label className="block text-sm text-gray-600 mb-1">Update goal:</label>
         <input
           type="number"
@@ -341,30 +321,30 @@ export default function Dashboard() {
         />
       </div>
 
-    {/* Smart Insights */}
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
-      {viewMode === 'monthly' && generateInsights(selectedMonthIndex).map((text, i) => (
-        <div key={i} className="bg-white rounded-xl shadow p-4">
-          <p className="text-gray-700">{text}</p>
-        </div>
-      ))}
-      {viewMode !== 'monthly' && (
-        <>
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-gray-700">
-              ✅ You saved <strong>{rangeRate}%</strong> of your income during this period.
-            </p>
+      {/* Smart Insights */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
+        {viewMode === 'monthly' && generateInsights(selectedMonthIndex).map((text, i) => (
+          <div key={i} className="bg-white rounded-xl shadow p-4">
+            <p className="text-gray-700">{text}</p>
           </div>
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-gray-700">
-              📈 Your total savings for this range is{' '}
-              <strong>${rangeSaved.toLocaleString()}</strong>.
-            </p>
-          </div>
-        </>
-      )}
-    </div> {/* End Smart Insights */}
-  </div> {/* End of Dashboard wrapper */}
-  );
+        ))}
+        {viewMode !== 'monthly' && (
+          <>
+            <div className="bg-white rounded-xl shadow p-4">
+              <p className="text-gray-700">
+                ✅ You saved <strong>{rangeRate}%</strong> of your income during this period.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl shadow p-4">
+              <p className="text-gray-700">
+                📈 Your total savings for this range is{' '}
+                <strong>${rangeSaved.toLocaleString()}</strong>.
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
 }
