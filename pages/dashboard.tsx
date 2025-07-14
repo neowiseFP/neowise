@@ -23,6 +23,84 @@ export default function Dashboard() {
   const [customStart, setCustomStart] = useState<number>(0)
   const [customEnd, setCustomEnd] = useState<number>(5)
   const router = useRouter()
+  const [goalAmount, setGoalAmount] = useState<number>(20000)
+
+  const categoryData: Record<string, { category: string; amount: number; note?: string }[]> = {
+    Jan: [
+      { category: 'Rent', amount: 2100 },
+      { category: 'Dining Out', amount: 540 },
+      { category: 'Groceries', amount: 320 },
+    ],
+    Feb: [
+      { category: 'Rent', amount: 2100 },
+      { category: 'Travel', amount: 1800, note: '🚗 Weekend trip to Napa' },
+      { category: 'Dining Out', amount: 670, note: '↑ 24% vs Jan' },
+    ],
+    Mar: [
+      { category: 'Rent', amount: 2100 },
+      { category: 'Travel', amount: 2600, note: '✈️ Flight + hotel for spring break' },
+      { category: 'Dining Out', amount: 780, note: '↑ 16% vs Feb' },
+    ],
+    Apr: [
+      { category: 'Rent', amount: 2100 },
+      { category: 'Groceries', amount: 400 },
+      { category: 'Dining Out', amount: 500 },
+    ],
+    May: [
+      { category: 'Rent', amount: 2100 },
+      { category: 'Dining Out', amount: 650 },
+      { category: 'Medical', amount: 300, note: '🩺 Annual check-up' },
+    ],
+    Jun: [
+      { category: 'Rent', amount: 2100 },
+      { category: 'Groceries', amount: 430, note: '⬇️ Down 12% vs May' },
+      { category: 'Dining Out', amount: 720 },
+    ],
+  }
+
+    function generateInsights(currentIndex: number) {
+      const current = realisticMonthlyData[currentIndex]
+      const prev = realisticMonthlyData[currentIndex - 1]
+
+      if (!current || !prev) return []
+
+      const insights = []
+
+      const savedCurrent = current.income - current.spending
+      const savedPrev = prev.income - prev.spending
+      const savingsDiff = savedCurrent - savedPrev
+      const rateCurrent = Math.round((savedCurrent / current.income) * 100)
+      const ratePrev = Math.round((savedPrev / prev.income) * 100)
+
+      if (savingsDiff > 0) {
+        insights.push(
+          `✅ You saved $${savingsDiff.toLocaleString()} more than in ${prev.month}. Great work!`
+        )
+      } else if (savingsDiff < 0) {
+        insights.push(
+          `⚠️ You saved $${Math.abs(savingsDiff).toLocaleString()} less than in ${prev.month}. Want to review spending?`
+        )
+      }
+
+      if (rateCurrent > ratePrev) {
+        insights.push(
+          `📈 Your savings rate improved to ${rateCurrent}% (up from ${ratePrev}%).`
+        )
+      } else if (rateCurrent < ratePrev) {
+        insights.push(
+          `📉 Your savings rate dropped to ${rateCurrent}% (was ${ratePrev}%).`
+        )
+      }
+
+      if (categoryData[current.month]) {
+        const travel = categoryData[current.month].find((c) => c.category === 'Travel')
+        if (travel && travel.amount > 2000) {
+          insights.push(`✈️ Travel spending was high at $${travel.amount.toLocaleString()} — consider budgeting next month.`)
+        }
+      }
+
+      return insights
+    }
 
   const realisticMonthlyData = [
     { month: 'Jan', income: 7400, spending: 5200 },
@@ -32,6 +110,18 @@ export default function Dashboard() {
     { month: 'May', income: 7800, spending: 5600 },
     { month: 'Jun', income: 7600, spending: 5450 },
   ]
+
+  const ytd = realisticMonthlyData.reduce(
+    (acc, m) => {
+      acc.income += m.income
+      acc.spending += m.spending
+      return acc
+    },
+    { income: 0, spending: 0 }
+  )
+  const ytdSaved = ytd.income - ytd.spending
+  const ytdRate = Math.round((ytdSaved / ytd.income) * 100)
+  const goalPercent = Math.min(Math.round((ytdSaved / goalAmount) * 100), 100)
 
   const getRange = (start: number, end: number) =>
     realisticMonthlyData.slice(start, end + 1)
@@ -226,26 +316,55 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Smart Insights */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
-        <div className="bg-white rounded-xl shadow p-4">
-          <p className="text-gray-700">
-            ✅ You saved <strong>{rangeRate}%</strong> of your income during this period.
-          </p>
+      {/* Savings Goal Tracker */}
+      <div className="bg-white rounded-xl shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-2">🎯 Savings Goal</h2>
+        <p className="text-gray-800 mb-2">
+          You've saved <strong>${ytdSaved.toLocaleString()}</strong> toward your{' '}
+          <strong>${goalAmount.toLocaleString()}</strong> goal —{' '}
+          <span className="text-green-600 font-semibold">{goalPercent}% complete</span>
+        </p>
+
+        <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
+          <div
+            className="h-full bg-green-500 transition-all duration-300 ease-in-out"
+            style={{ width: `${goalPercent}%` }}
+          ></div>
         </div>
-        <div className="bg-white rounded-xl shadow p-4">
-          <p className="text-gray-700">
-            💡 Spending appears consistent, but we’ll surface trends as we analyze categories.
-          </p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-4">
-          <p className="text-gray-700">
-            📈 Your total savings for this range is{' '}
-            <strong>${rangeSaved.toLocaleString()}</strong>.
-          </p>
-        </div>
+
+        <label className="block text-sm text-gray-600 mb-1">Update goal:</label>
+        <input
+          type="number"
+          className="border px-3 py-1 rounded w-48"
+          value={goalAmount}
+          onChange={(e) => setGoalAmount(Number(e.target.value))}
+        />
       </div>
-    </div>
-  )
-}
+
+    {/* Smart Insights */}
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
+      {viewMode === 'monthly' && generateInsights(selectedMonthIndex).map((text, i) => (
+        <div key={i} className="bg-white rounded-xl shadow p-4">
+          <p className="text-gray-700">{text}</p>
+        </div>
+      ))}
+      {viewMode !== 'monthly' && (
+        <>
+          <div className="bg-white rounded-xl shadow p-4">
+            <p className="text-gray-700">
+              ✅ You saved <strong>{rangeRate}%</strong> of your income during this period.
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4">
+            <p className="text-gray-700">
+              📈 Your total savings for this range is{' '}
+              <strong>${rangeSaved.toLocaleString()}</strong>.
+            </p>
+          </div>
+        </>
+      )}
+    </div> {/* End Smart Insights */}
+    </div> {/* End of Dashboard wrapper */}
+    )
+    }
