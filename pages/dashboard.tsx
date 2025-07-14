@@ -42,12 +42,9 @@ export default function Dashboard() {
       : viewMode === '3month'
       ? realisticMonthlyData.slice(-3)
       : viewMode === 'weekly'
-      ? [
-          { month: 'Week 1', income: 1800, spending: 1200 },
-          { month: 'Week 2', income: 1700, spending: 1300 },
-          { month: 'Week 3', income: 1900, spending: 1250 },
-          { month: 'Week 4', income: 1800, spending: 1350 },
-        ]
+      ? [ /* mock weekly data */ ]
+      : viewMode === 'ytd'
+      ? realisticMonthlyData.slice(0, selectedMonthIndex + 1)
       : viewMode === 'annual'
       ? realisticMonthlyData
       : [realisticMonthlyData[selectedMonthIndex]]
