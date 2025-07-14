@@ -339,7 +339,7 @@ export default function Dashboard() {
                   </span>
                   <div className="text-right">
                     <div className="font-medium">${item.amount.toLocaleString()}</div>
-                    {changeText && (
+                    {changeText && change !== null && (
                       <div className={`text-sm ${change > 0 ? 'text-red-500' : change < 0 ? 'text-green-600' : 'text-gray-400'}`}>
                         {changeText} vs {prevMonth}
                       </div>
