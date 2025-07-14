@@ -22,8 +22,8 @@ export default function Dashboard() {
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number>(5)
   const [customStart, setCustomStart] = useState<number>(0)
   const [customEnd, setCustomEnd] = useState<number>(5)
-  const router = useRouter()
   const [goalAmount, setGoalAmount] = useState<number>(20000)
+  const router = useRouter()
 
   const realisticMonthlyData = [
     { month: 'Jan', income: 7400, spending: 5200 },
@@ -73,6 +73,7 @@ export default function Dashboard() {
     if (!current || !prev) return []
 
     const insights = []
+
     const savedCurrent = current.income - current.spending
     const savedPrev = prev.income - prev.spending
     const savingsDiff = savedCurrent - savedPrev
@@ -108,10 +109,10 @@ export default function Dashboard() {
     { income: 0, spending: 0 }
   )
   const ytdSaved = ytd.income - ytd.spending
-  const ytdRate = Math.round((ytdSaved / ytd.income) * 100)
   const goalPercent = Math.min(Math.round((ytdSaved / goalAmount) * 100), 100)
 
-  const getRange = (start: number, end: number) => realisticMonthlyData.slice(start, end + 1)
+  const getRange = (start: number, end: number) =>
+    realisticMonthlyData.slice(start, end + 1)
 
   const selectedRange =
     viewMode === 'custom'
@@ -119,7 +120,7 @@ export default function Dashboard() {
       : viewMode === '3month'
       ? realisticMonthlyData.slice(-3)
       : viewMode === 'weekly'
-      ? []
+      ? realisticMonthlyData.slice(-1) // placeholder
       : viewMode === 'ytd'
       ? realisticMonthlyData.slice(0, selectedMonthIndex + 1)
       : viewMode === 'annual'
@@ -139,7 +140,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
       if (session) {
         setUser(session.user)
         setLoading(false)
@@ -169,7 +173,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header + View Mode Selector */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
         <div>
           <h1 className="text-2xl font-bold">👋 Welcome to your Dashboard</h1>
@@ -201,7 +205,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Custom Date Picker */}
+      {/* Custom Range Picker */}
       {viewMode === 'custom' && (
         <div className="mb-6 flex gap-4 items-center">
           <label>
@@ -256,7 +260,7 @@ export default function Dashboard() {
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8 outline-none focus:outline-none">
+      <div className="bg-white rounded-xl shadow p-6 mb-8">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData}>
@@ -268,14 +272,8 @@ export default function Dashboard() {
               {chartData.map((_, i) => (
                 <Cell
                   key={`income-${i}`}
-                  fill={
-                    viewMode === 'monthly' && i === selectedMonthIndex
-                      ? '#16a34a'
-                      : '#22C55E'
-                  }
-                  onClick={
-                    viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined
-                  }
+                  fill={viewMode === 'monthly' && i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
+                  onClick={viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined}
                 />
               ))}
             </Bar>
@@ -283,14 +281,8 @@ export default function Dashboard() {
               {chartData.map((_, i) => (
                 <Cell
                   key={`spending-${i}`}
-                  fill={
-                    viewMode === 'monthly' && i === selectedMonthIndex
-                      ? '#b91c1c'
-                      : '#EF4444'
-                  }
-                  onClick={
-                    viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined
-                  }
+                  fill={viewMode === 'monthly' && i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
+                  onClick={viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined}
                 />
               ))}
             </Bar>
@@ -298,7 +290,7 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Savings Goal */}
+      {/* Savings Goal Tracker */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">
         <h2 className="text-lg font-semibold mb-2">🎯 Savings Goal</h2>
         <p className="text-gray-800 mb-2">
@@ -324,11 +316,12 @@ export default function Dashboard() {
       {/* Smart Insights */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
-        {viewMode === 'monthly' && generateInsights(selectedMonthIndex).map((text, i) => (
-          <div key={i} className="bg-white rounded-xl shadow p-4">
-            <p className="text-gray-700">{text}</p>
-          </div>
-        ))}
+        {viewMode === 'monthly' &&
+          generateInsights(selectedMonthIndex).map((text, i) => (
+            <div key={i} className="bg-white rounded-xl shadow p-4">
+              <p className="text-gray-700">{text}</p>
+            </div>
+          ))}
         {viewMode !== 'monthly' && (
           <>
             <div className="bg-white rounded-xl shadow p-4">
@@ -338,8 +331,7 @@ export default function Dashboard() {
             </div>
             <div className="bg-white rounded-xl shadow p-4">
               <p className="text-gray-700">
-                📈 Your total savings for this range is{' '}
-                <strong>${rangeSaved.toLocaleString()}</strong>.
+                📈 Your total savings for this range is <strong>${rangeSaved.toLocaleString()}</strong>.
               </p>
             </div>
           </>
