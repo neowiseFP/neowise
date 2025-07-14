@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabaseClient'
+import { useRef } from 'react'
 import {
   BarChart,
   Bar,
@@ -81,6 +82,16 @@ export default function Dashboard() {
     acc.spending += m.spending
     return acc
   }, { income: 0, spending: 0 })
+
+  const summaryRef = useRef<HTMLDivElement>(null)
+  const [highlighted, setHighlighted] = useState(false)
+
+  const handleBarClick = (index: number) => {
+    setSelectedMonthIndex(index)
+    setHighlighted(true)
+    summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setTimeout(() => setHighlighted(false), 1000)
+  }
 
   const ytdSaved = ytd.income - ytd.spending
   const goalPercent = Math.min(Math.round((ytdSaved / goalAmount) * 100), 100)
@@ -200,7 +211,12 @@ export default function Dashboard() {
       )}
 
       {/* Summary */}
-      <div className="bg-white rounded-xl shadow p-6 mb-6">
+      <div
+        ref={summaryRef}
+        className={`bg-white rounded-xl shadow p-6 mb-6 transition duration-500 ${
+          highlighted ? 'ring-2 ring-green-400' : ''
+        }`}
+      >
         <h2 className="text-lg font-semibold mb-2">
           {viewMode === 'ytd'
             ? '📆 YTD Summary'
@@ -235,7 +251,8 @@ export default function Dashboard() {
                 <Cell
                   key={`income-${i}`}
                   fill={viewMode === 'monthly' && i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
-                  onClick={viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined}
+                  onClick={viewMode === 'monthly' ? () => handleBarClick(i) : undefined}
+                  style={{ outline: 'none' }}
                 />
               ))}
             </Bar>
@@ -244,7 +261,8 @@ export default function Dashboard() {
                 <Cell
                   key={`spending-${i}`}
                   fill={viewMode === 'monthly' && i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
-                  onClick={viewMode === 'monthly' ? () => setSelectedMonthIndex(i) : undefined}
+                  onClick={viewMode === 'monthly' ? () => handleBarClick(i) : undefined}
+                  style={{ outline: 'none' }}
                 />
               ))}
             </Bar>
