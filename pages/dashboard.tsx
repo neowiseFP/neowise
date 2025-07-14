@@ -365,6 +365,6 @@ export default function Dashboard() {
         </>
       )}
     </div> {/* End Smart Insights */}
-    </div> {/* End of Dashboard wrapper */}
-    )
-    }
+  </div> {/* End of Dashboard wrapper */}
+  );
+}
