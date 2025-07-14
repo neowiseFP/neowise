@@ -240,7 +240,7 @@ export default function Dashboard() {
       {/* Chart */}
       <div className="bg-white rounded-xl shadow p-6 mb-8 focus:outline-none focus:ring-0">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={300} style={{ outline: 'none' }}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
@@ -338,7 +338,9 @@ export default function Dashboard() {
                     {item.note ? `${item.category} ${item.note}` : item.category}
                   </span>
                   <div className="text-right">
-                    <div className="font-medium">${item.amount.toLocaleString()}</div>
+                    <div className="font-medium">
+                      ${item.amount.toLocaleString()} <span className="text-sm text-gray-500">({percent}%)</span>
+                    </div>
                     {changeText && change !== null && (
                       <div className={`text-sm ${change > 0 ? 'text-red-500' : change < 0 ? 'text-green-600' : 'text-gray-400'}`}>
                         {changeText} vs {prevMonth}
