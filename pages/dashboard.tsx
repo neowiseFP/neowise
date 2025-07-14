@@ -102,7 +102,7 @@ export default function Dashboard() {
     viewMode === 'custom' ? getRange(customStart, customEnd)
     : viewMode === '3month' ? realisticMonthlyData.slice(-3)
     : viewMode === 'weekly' ? realisticMonthlyData.slice(-4)
-    : viewMode === 'ytd' ? realisticMonthlyData.slice(0, selectedMonthIndex + 1)
+    : viewMode === 'ytd' ? realisticMonthlyData
     : viewMode === 'annual' ? realisticMonthlyData
     : [realisticMonthlyData[selectedMonthIndex]]
 
@@ -238,7 +238,7 @@ export default function Dashboard() {
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
+      <div className="bg-white rounded-xl shadow p-6 mb-8 focus:outline-none focus:ring-0">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData}>
