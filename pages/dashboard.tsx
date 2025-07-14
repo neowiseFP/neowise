@@ -1,3 +1,4 @@
+// === BEGIN Dashboard.tsx ===
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
@@ -35,64 +36,39 @@ export default function Dashboard() {
   ]
 
   const categoryData: Record<string, { category: string; amount: number; note?: string }[]> = {
-    Jan: [
-      { category: 'Rent', amount: 2100 },
-      { category: 'Dining Out', amount: 540 },
-      { category: 'Groceries', amount: 320 },
-    ],
-    Feb: [
-      { category: 'Rent', amount: 2100 },
-      { category: 'Travel', amount: 1800, note: '🚗 Weekend trip to Napa' },
-      { category: 'Dining Out', amount: 670, note: '↑ 24% vs Jan' },
-    ],
-    Mar: [
-      { category: 'Rent', amount: 2100 },
-      { category: 'Travel', amount: 2600, note: '✈️ Flight + hotel for spring break' },
-      { category: 'Dining Out', amount: 780, note: '↑ 16% vs Feb' },
-    ],
-    Apr: [
-      { category: 'Rent', amount: 2100 },
-      { category: 'Groceries', amount: 400 },
-      { category: 'Dining Out', amount: 500 },
-    ],
-    May: [
-      { category: 'Rent', amount: 2100 },
-      { category: 'Dining Out', amount: 650 },
-      { category: 'Medical', amount: 300, note: '🩺 Annual check-up' },
-    ],
-    Jun: [
-      { category: 'Rent', amount: 2100 },
-      { category: 'Groceries', amount: 430, note: '⬇️ Down 12% vs May' },
-      { category: 'Dining Out', amount: 720 },
-    ],
+    Jan: [{ category: 'Rent', amount: 2100 }, { category: 'Dining Out', amount: 540 }, { category: 'Groceries', amount: 320 }],
+    Feb: [{ category: 'Rent', amount: 2100 }, { category: 'Travel', amount: 1800, note: '🚗 Weekend trip to Napa' }, { category: 'Dining Out', amount: 670, note: '↑ 24% vs Jan' }],
+    Mar: [{ category: 'Rent', amount: 2100 }, { category: 'Travel', amount: 2600, note: '✈️ Flight + hotel for spring break' }, { category: 'Dining Out', amount: 780, note: '↑ 16% vs Feb' }],
+    Apr: [{ category: 'Rent', amount: 2100 }, { category: 'Groceries', amount: 400 }, { category: 'Dining Out', amount: 500 }],
+    May: [{ category: 'Rent', amount: 2100 }, { category: 'Dining Out', amount: 650 }, { category: 'Medical', amount: 300, note: '🩺 Annual check-up' }],
+    Jun: [{ category: 'Rent', amount: 2100 }, { category: 'Groceries', amount: 430, note: '⬇️ Down 12% vs May' }, { category: 'Dining Out', amount: 720 }],
   }
 
   function generateInsights(currentIndex: number) {
     const current = realisticMonthlyData[currentIndex]
     const prev = realisticMonthlyData[currentIndex - 1]
     if (!current || !prev) return []
-
     const insights = []
 
     const savedCurrent = current.income - current.spending
     const savedPrev = prev.income - prev.spending
-    const savingsDiff = savedCurrent - savedPrev
+    const diff = savedCurrent - savedPrev
     const rateCurrent = Math.round((savedCurrent / current.income) * 100)
     const ratePrev = Math.round((savedPrev / prev.income) * 100)
 
-    if (savingsDiff > 0) {
-      insights.push(`✅ You saved $${savingsDiff.toLocaleString()} more than in ${prev.month}. Great work!`)
-    } else if (savingsDiff < 0) {
-      insights.push(`⚠️ You saved $${Math.abs(savingsDiff).toLocaleString()} less than in ${prev.month}. Want to review spending?`)
+    if (diff > 0) {
+      insights.push(`✅ You saved $${diff.toLocaleString()} more than in ${prev.month}. Great work!`)
+    } else if (diff < 0) {
+      insights.push(`⚠️ You saved $${Math.abs(diff).toLocaleString()} less than in ${prev.month}. Want to review spending?`)
     }
 
-    if (rateCurrent > ratePrev) {
-      insights.push(`📈 Your savings rate improved to ${rateCurrent}% (up from ${ratePrev}%).`)
-    } else if (rateCurrent < ratePrev) {
-      insights.push(`📉 Your savings rate dropped to ${rateCurrent}% (was ${ratePrev}%).`)
+    if (rateCurrent !== ratePrev) {
+      insights.push(rateCurrent > ratePrev
+        ? `📈 Your savings rate improved to ${rateCurrent}% (up from ${ratePrev}%).`
+        : `📉 Your savings rate dropped to ${rateCurrent}% (was ${ratePrev}%).`)
     }
 
-    const travel = categoryData[current.month]?.find((c) => c.category === 'Travel')
+    const travel = categoryData[current.month]?.find(c => c.category === 'Travel')
     if (travel && travel.amount > 2000) {
       insights.push(`✈️ Travel spending was high at $${travel.amount.toLocaleString()} — consider budgeting next month.`)
     }
@@ -100,32 +76,24 @@ export default function Dashboard() {
     return insights
   }
 
-  const ytd = realisticMonthlyData.reduce(
-    (acc, m) => {
-      acc.income += m.income
-      acc.spending += m.spending
-      return acc
-    },
-    { income: 0, spending: 0 }
-  )
+  const ytd = realisticMonthlyData.reduce((acc, m) => {
+    acc.income += m.income
+    acc.spending += m.spending
+    return acc
+  }, { income: 0, spending: 0 })
+
   const ytdSaved = ytd.income - ytd.spending
   const goalPercent = Math.min(Math.round((ytdSaved / goalAmount) * 100), 100)
 
-  const getRange = (start: number, end: number) =>
-    realisticMonthlyData.slice(start, end + 1)
+  const getRange = (start: number, end: number) => realisticMonthlyData.slice(start, end + 1)
 
   const selectedRange =
-    viewMode === 'custom'
-      ? getRange(customStart, customEnd)
-      : viewMode === '3month'
-      ? realisticMonthlyData.slice(-3)
-      : viewMode === 'weekly'
-      ? realisticMonthlyData.slice(-1) // placeholder
-      : viewMode === 'ytd'
-      ? realisticMonthlyData.slice(0, selectedMonthIndex + 1)
-      : viewMode === 'annual'
-      ? realisticMonthlyData
-      : [realisticMonthlyData[selectedMonthIndex]]
+    viewMode === 'custom' ? getRange(customStart, customEnd)
+    : viewMode === '3month' ? realisticMonthlyData.slice(-3)
+    : viewMode === 'weekly' ? realisticMonthlyData.slice(-4)
+    : viewMode === 'ytd' ? realisticMonthlyData.slice(0, selectedMonthIndex + 1)
+    : viewMode === 'annual' ? realisticMonthlyData
+    : [realisticMonthlyData[selectedMonthIndex]]
 
   const rangeIncome = selectedRange.reduce((sum, m) => sum + m.income, 0)
   const rangeSpending = selectedRange.reduce((sum, m) => sum + m.spending, 0)
@@ -140,32 +108,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
+      const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         setUser(session.user)
         setLoading(false)
-        if (window.location.hash) {
-          window.history.replaceState({}, document.title, window.location.pathname)
-        }
+        if (window.location.hash) window.history.replaceState({}, document.title, window.location.pathname)
       } else {
         setTimeout(async () => {
           const { data: retry } = await supabase.auth.getSession()
           if (retry.session) {
             setUser(retry.session.user)
             setLoading(false)
-            if (window.location.hash) {
-              window.history.replaceState({}, document.title, window.location.pathname)
-            }
-          } else {
-            router.push('/login')
-          }
+            if (window.location.hash) window.history.replaceState({}, document.title, window.location.pathname)
+          } else router.push('/login')
         }, 1000)
       }
     }
-
     checkSession()
   }, [router])
 
@@ -194,9 +152,7 @@ export default function Dashboard() {
           {['weekly', 'monthly', '3month', 'ytd', 'annual', 'custom'].map((mode) => (
             <button
               key={mode}
-              className={`px-3 py-1 rounded-md text-sm font-medium border ${
-                viewMode === mode ? 'bg-black text-white' : 'bg-white text-black'
-              }`}
+              className={`px-3 py-1 rounded-md text-sm font-medium border ${viewMode === mode ? 'bg-black text-white' : 'bg-white text-black'}`}
               onClick={() => setViewMode(mode as ViewMode)}
             >
               {mode.toUpperCase()}
@@ -205,31 +161,39 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Month Navigation */}
+      {['monthly', 'ytd'].includes(viewMode) && (
+        <div className="mb-4 flex justify-between max-w-xs">
+          <button
+            onClick={() => setSelectedMonthIndex((prev) => Math.max(0, prev - 1))}
+            disabled={selectedMonthIndex === 0}
+            className="px-2 py-1 text-sm border rounded disabled:opacity-50"
+          >
+            ⬅ Prev
+          </button>
+          <button
+            onClick={() => setSelectedMonthIndex((prev) => Math.min(realisticMonthlyData.length - 1, prev + 1))}
+            disabled={selectedMonthIndex === realisticMonthlyData.length - 1}
+            className="px-2 py-1 text-sm border rounded disabled:opacity-50"
+          >
+            Next ➡
+          </button>
+        </div>
+      )}
+
       {/* Custom Range Picker */}
       {viewMode === 'custom' && (
         <div className="mb-6 flex gap-4 items-center">
           <label>
             Start:
-            <select
-              className="ml-2 border rounded px-2 py-1"
-              value={customStart}
-              onChange={(e) => setCustomStart(Number(e.target.value))}
-            >
-              {realisticMonthlyData.map((m, i) => (
-                <option key={m.month} value={i}>{m.month}</option>
-              ))}
+            <select className="ml-2 border rounded px-2 py-1" value={customStart} onChange={(e) => setCustomStart(Number(e.target.value))}>
+              {realisticMonthlyData.map((m, i) => <option key={m.month} value={i}>{m.month}</option>)}
             </select>
           </label>
           <label>
             End:
-            <select
-              className="ml-2 border rounded px-2 py-1"
-              value={customEnd}
-              onChange={(e) => setCustomEnd(Number(e.target.value))}
-            >
-              {realisticMonthlyData.map((m, i) => (
-                <option key={m.month} value={i}>{m.month}</option>
-              ))}
+            <select className="ml-2 border rounded px-2 py-1" value={customEnd} onChange={(e) => setCustomEnd(Number(e.target.value))}>
+              {realisticMonthlyData.map((m, i) => <option key={m.month} value={i}>{m.month}</option>)}
             </select>
           </label>
         </div>
@@ -253,9 +217,7 @@ export default function Dashboard() {
         <p className="text-gray-800">
           Income: <strong>${rangeIncome.toLocaleString()}</strong> — Spending:{' '}
           <strong>${rangeSpending.toLocaleString()}</strong> — Saved:{' '}
-          <strong className="text-green-600">
-            ${rangeSaved.toLocaleString()} ({rangeRate}%)
-          </strong>
+          <strong className="text-green-600">${rangeSaved.toLocaleString()} ({rangeRate}%)</strong>
         </p>
       </div>
 
@@ -290,19 +252,14 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Savings Goal Tracker */}
+      {/* Savings Goal */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">
         <h2 className="text-lg font-semibold mb-2">🎯 Savings Goal</h2>
         <p className="text-gray-800 mb-2">
-          You've saved <strong>${ytdSaved.toLocaleString()}</strong> toward your{' '}
-          <strong>${goalAmount.toLocaleString()}</strong> goal —{' '}
-          <span className="text-green-600 font-semibold">{goalPercent}% complete</span>
+          You've saved <strong>${ytdSaved.toLocaleString()}</strong> toward your <strong>${goalAmount.toLocaleString()}</strong> goal — <span className="text-green-600 font-semibold">{goalPercent}% complete</span>
         </p>
         <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
-          <div
-            className="h-full bg-green-500 transition-all duration-300 ease-in-out"
-            style={{ width: `${goalPercent}%` }}
-          ></div>
+          <div className="h-full bg-green-500 transition-all duration-300 ease-in-out" style={{ width: `${goalPercent}%` }} />
         </div>
         <label className="block text-sm text-gray-600 mb-1">Update goal:</label>
         <input
@@ -325,14 +282,10 @@ export default function Dashboard() {
         {viewMode !== 'monthly' && (
           <>
             <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-gray-700">
-                ✅ You saved <strong>{rangeRate}%</strong> of your income during this period.
-              </p>
+              <p className="text-gray-700">✅ You saved <strong>{rangeRate}%</strong> of your income during this period.</p>
             </div>
             <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-gray-700">
-                📈 Your total savings for this range is <strong>${rangeSaved.toLocaleString()}</strong>.
-              </p>
+              <p className="text-gray-700">📈 Your total savings for this range is <strong>${rangeSaved.toLocaleString()}</strong>.</p>
             </div>
           </>
         )}
