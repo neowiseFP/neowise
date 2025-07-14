@@ -300,14 +300,57 @@ export default function Dashboard() {
         {viewMode !== 'monthly' && (
           <>
             <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-gray-700">✅ You saved <strong>{rangeRate}%</strong> of your income during this period.</p>
+              <p className="text-gray-700">
+                ✅ You saved <strong>{rangeRate}%</strong> of your income during this period.
+              </p>
             </div>
             <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-gray-700">📈 Your total savings for this range is <strong>${rangeSaved.toLocaleString()}</strong>.</p>
+              <p className="text-gray-700">
+                📈 Your total savings for this range is <strong>${rangeSaved.toLocaleString()}</strong>.
+              </p>
             </div>
           </>
         )}
       </div>
+
+      {/* Category Breakdown (Monthly View) */}
+      {viewMode === 'monthly' && categoryData[realisticMonthlyData[selectedMonthIndex].month] && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-2">📂 Spending Breakdown</h2>
+          <div className="bg-white rounded-xl shadow p-4 space-y-2">
+            {categoryData[realisticMonthlyData[selectedMonthIndex].month].map((item, i) => {
+              const currentMonth = realisticMonthlyData[selectedMonthIndex].month
+              const prevMonth = realisticMonthlyData[selectedMonthIndex - 1]?.month
+              const prevItems = categoryData[prevMonth] || []
+              const prevAmount = prevItems.find(p => p.category === item.category)?.amount
+              const change = prevAmount !== undefined ? item.amount - prevAmount : null
+              const changeText = change !== null
+                ? change > 0
+                  ? `↑ $${change.toLocaleString()}`
+                  : change < 0
+                  ? `↓ $${Math.abs(change).toLocaleString()}`
+                  : '—'
+                : null
+
+              return (
+                <div key={i} className="flex justify-between items-center">
+                  <span>
+                    {item.note ? `${item.category} ${item.note}` : item.category}
+                  </span>
+                  <div className="text-right">
+                    <div className="font-medium">${item.amount.toLocaleString()}</div>
+                    {changeText && (
+                      <div className={`text-sm ${change > 0 ? 'text-red-500' : change < 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                        {changeText} vs {prevMonth}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
