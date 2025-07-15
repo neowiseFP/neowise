@@ -17,6 +17,13 @@ import {
 
 type ViewMode = 'weekly' | 'monthly' | '3month' | 'ytd' | 'annual' | 'custom'
 
+type DataPoint = {
+  income: number
+  spending: number
+  month?: string
+  week?: string
+}
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
@@ -27,13 +34,20 @@ export default function Dashboard() {
   const [goalAmount, setGoalAmount] = useState<number>(20000)
   const router = useRouter()
 
-  const realisticMonthlyData = [
+  const realisticMonthlyData: DataPoint[] = [
     { month: 'Jan', income: 7400, spending: 5200 },
     { month: 'Feb', income: 7500, spending: 5300 },
     { month: 'Mar', income: 7300, spending: 5100 },
     { month: 'Apr', income: 7600, spending: 5400 },
     { month: 'May', income: 7800, spending: 5600 },
     { month: 'Jun', income: 7600, spending: 5450 },
+  ]
+
+  const realisticWeeklyData: DataPoint[] = [
+    { week: 'Week 1 (Jun 1–7)', income: 1800, spending: 1250 },
+    { week: 'Week 2 (Jun 8–14)', income: 1900, spending: 1350 },
+    { week: 'Week 3 (Jun 15–21)', income: 1850, spending: 1400 },
+    { week: 'Week 4 (Jun 22–28)', income: 1950, spending: 1300 },
   ]
 
   const categoryData: Record<string, { category: string; amount: number; note?: string }[]> = {
@@ -101,7 +115,7 @@ export default function Dashboard() {
   const selectedRange =
     viewMode === 'custom' ? getRange(customStart, customEnd)
     : viewMode === '3month' ? realisticMonthlyData.slice(-3)
-    : viewMode === 'weekly' ? realisticMonthlyData.slice(-1)
+    : viewMode === 'weekly' ? realisticWeeklyData
     : viewMode === 'ytd' ? realisticMonthlyData
     : viewMode === 'annual' ? realisticMonthlyData
     : [realisticMonthlyData[selectedMonthIndex]]
@@ -252,7 +266,7 @@ export default function Dashboard() {
                   <Cell
                     key={`income-${i}`}
                     fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
-                    onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
+                    onClick={['monthly', 'ytd', '3month', 'weekly'].includes(viewMode) ? () => handleBarClick(i) : undefined}
                     style={{ outline: 'none' }}
                   />
                 ))}
@@ -262,7 +276,7 @@ export default function Dashboard() {
                   <Cell
                     key={`spending-${i}`}
                     fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
-                    onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
+                    onClick={['monthly', 'ytd', '3month', 'weekly'].includes(viewMode) ? () => handleBarClick(i) : undefined}
                     style={{ outline: 'none' }}
                   />
                 ))}
