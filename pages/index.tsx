@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
 import Navbar from "@/components/Navbar";
+import { MessageCircle, Calculator, UserCheck } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant" | "system";
@@ -241,16 +242,25 @@ export default function Home() {
         <meta name="twitter:image" content="https://neowise.io/images/neo-preview-v2.png" />
       </Head>
 
-      <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-white text-gray-900 font-sans">
         <Navbar />
 
         <div className="p-4">
-          <h1 className="text-center text-2xl font-bold mb-1">
+        <header className="text-center space-y-3 mb-6">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
             Neo — Your Financial AI Assistant
           </h1>
-          <p className="text-center text-gray-600 mb-4">
+          <p className="text-gray-600 text-base sm:text-lg">
             Your Financial Life: Smart insights, track your progress, and make confident decisions.
           </p>
+        </header>
+
+        <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow p-6 w-full max-w-xl text-center mx-auto mb-6">
+          <p className="text-gray-800">
+            Hi, I’m <strong>Neo</strong> — your financial AI assistant, trained by a human CFP®. Ask me anything to get started.
+          </p>
+        </div>
+        
           <div
             ref={chatRef}
             className="space-y-4 mb-4 min-h-[50vh] max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
