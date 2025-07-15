@@ -1,9 +1,9 @@
 // === BEGIN Dashboard.tsx ===
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabaseClient'
-import { useRef } from 'react'
+import Navbar from '@/components/Navbar'
 import {
   BarChart,
   Bar,
@@ -155,10 +155,11 @@ export default function Dashboard() {
   if (loading) return <p className="p-8 text-center">Loading...</p>
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+      <Navbar />
+      <div className="p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-        <div>
           <h1 className="text-2xl font-bold">👋 Welcome to your Dashboard</h1>
           <p className="text-gray-600">
             Logged in as: <strong>{user?.email}</strong>
