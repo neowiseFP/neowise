@@ -24,6 +24,9 @@ type DataPoint = {
   week?: string
 }
 
+const fullMonthName = (abbr: string) =>
+  new Date(`${abbr} 1, 2024`).toLocaleString('en-US', { month: 'long' })
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
@@ -127,7 +130,7 @@ export default function Dashboard() {
 
   const chartData = selectedRange.map((m, i) => ({
     ...m,
-    name: m.month ?? m.week ?? `Item ${i + 1}`,
+    name: m.month ? fullMonthName(m.month) : m.week ?? `Item ${i + 1}`,
     index: i,
   }))
 
@@ -193,14 +196,14 @@ export default function Dashboard() {
           <button
             onClick={() => setSelectedMonthIndex((prev) => Math.max(0, prev - 1))}
             disabled={selectedMonthIndex === 0}
-            className="px-2 py-1 text-sm border rounded disabled:opacity-50"
+            className="px-3 py-1 rounded-md border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
           >
             ⬅ Prev
           </button>
           <button
             onClick={() => setSelectedMonthIndex((prev) => Math.min(realisticMonthlyData.length - 1, prev + 1))}
             disabled={selectedMonthIndex === realisticMonthlyData.length - 1}
-            className="px-2 py-1 text-sm border rounded disabled:opacity-50"
+            className="px-3 py-1 rounded-md border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
           >
             Next ➡
           </button>
@@ -236,14 +239,14 @@ export default function Dashboard() {
           {viewMode === 'ytd'
             ? '📆 YTD Summary'
             : viewMode === 'custom'
-            ? `🗓 Custom Summary (${realisticMonthlyData[customStart].month} to ${realisticMonthlyData[customEnd].month})`
+            ? `🗓 Custom Summary (${fullMonthName(realisticMonthlyData[customStart].month!)} to ${fullMonthName(realisticMonthlyData[customEnd].month!)})`
             : viewMode === '3month'
             ? '📉 Last 3 Months'
             : viewMode === 'annual'
             ? '📆 Annual Summary'
             : viewMode === 'weekly'
             ? '🗓 Last 4 Weeks'
-            : `📅 ${realisticMonthlyData[selectedMonthIndex].month} Summary`}
+            : `📅 ${fullMonthName(realisticMonthlyData[selectedMonthIndex].month!)} Summary`}
         </h2>
         <p className="text-gray-800">
           Income: <strong>${rangeIncome.toLocaleString()}</strong> — Spending:{' '}
@@ -262,7 +265,7 @@ export default function Dashboard() {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="income">
+              <Bar dataKey="income" radius={[10, 10, 0, 0]}>
                 {chartData.map((_, i) => (
                   <Cell
                     key={`income-${i}`}
@@ -272,7 +275,7 @@ export default function Dashboard() {
                   />
                 ))}
               </Bar>
-              <Bar dataKey="spending">
+              <Bar dataKey="spending" radius={[10, 10, 0, 0]}>
                 {chartData.map((_, i) => (
                   <Cell
                     key={`spending-${i}`}
