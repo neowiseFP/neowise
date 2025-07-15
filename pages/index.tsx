@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
+import Navbar from "@/components/Navbar";
 
 type Message = {
   role: "user" | "assistant" | "system";
@@ -239,13 +240,17 @@ export default function Home() {
         <meta name="twitter:description" content="Neo is your trusted financial assistant, powered by AI and trained by a CFP®. Get honest, smart guidance for every money decision — anytime you need it." />
         <meta name="twitter:image" content="https://neowise.io/images/neo-preview-v2.png" />
       </Head>
-      <div className="min-h-screen bg-gray-50 p-4 text-gray-900 font-sans">
-        <h1 className="text-center text-2xl font-bold mb-1">
-          Neo — Your Financial AI Assistant
-        </h1>
-        <p className="text-center text-gray-600 mb-4">Your Financial Life: Smart insights, track your progress, and make confident decisions.</p>
 
-        <div className="max-w-2xl mx-auto bg-white px-4 py-6 sm:px-6 rounded shadow">
+      <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+        <Navbar />
+
+        <div className="p-4">
+          <h1 className="text-center text-2xl font-bold mb-1">
+            Neo — Your Financial AI Assistant
+          </h1>
+          <p className="text-center text-gray-600 mb-4">
+            Your Financial Life: Smart insights, track your progress, and make confident decisions.
+          </p>
           <div
             ref={chatRef}
             className="space-y-4 mb-4 min-h-[50vh] max-h-[75vh] md:max-h-[60vh] overflow-y-auto"

@@ -13,7 +13,7 @@ export default function Navbar() {
     <nav className="flex items-center justify-between px-6 py-4 shadow bg-white">
       <div className="text-lg font-bold">Neo</div>
       <div className="flex gap-6">
-        <Link href="/chat" className={isActive('/chat')}>Chat</Link>
+        <Link href="/" className={isActive('/')}>Chat</Link>
         <Link href="/dashboard/cashflow" className={isActive('/dashboard/cashflow')}>Cash Flow</Link>
         <Link href="/dashboard/planning" className={isActive('/dashboard/planning')}>Planning</Link>
       </div>
