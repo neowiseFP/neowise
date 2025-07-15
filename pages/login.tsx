@@ -16,6 +16,7 @@ export default function Login() {
       email,
       options: {
         emailRedirectTo: redirectUrl,
+        shouldCreateUser: true,
       },
     })
 
