@@ -23,3 +23,12 @@
 .recharts-wrapper:focus {
   outline: none !important;
 }
+
+/* Fully suppress blue outline on any focused Recharts chart wrapper or SVG bar */
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-wrapper *:focus,
+.recharts-wrapper *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}

@@ -240,7 +240,7 @@ export default function Dashboard() {
       {/* Chart */}
       <div className="bg-white rounded-xl shadow p-6 mb-8 focus:outline-none focus:ring-0">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
-        <div className="focus:outline-none focus:ring-0" tabIndex={-1}>
+        <div className="outline-none ring-0">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
