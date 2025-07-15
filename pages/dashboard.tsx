@@ -240,34 +240,36 @@ export default function Dashboard() {
       {/* Chart */}
       <div className="bg-white rounded-xl shadow p-6 mb-8 focus:outline-none focus:ring-0">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
-        <ResponsiveContainer width="100%" height={300} className="focus:outline-none focus:ring-0">
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="income">
-              {chartData.map((_, i) => (
-                <Cell
-                  key={`income-${i}`}
-                  fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
-                  onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
-                  style={{ outline: 'none' }}
-                />
-              ))}
-            </Bar>
-            <Bar dataKey="spending">
-              {chartData.map((_, i) => (
-                <Cell
-                  key={`spending-${i}`}
-                  fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
-                  onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
-                  style={{ outline: 'none' }}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="focus:outline-none focus:ring-0" tabIndex={-1}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="income">
+                {chartData.map((_, i) => (
+                  <Cell
+                    key={`income-${i}`}
+                    fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
+                    onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
+                    style={{ outline: 'none' }}
+                  />
+                ))}
+              </Bar>
+              <Bar dataKey="spending">
+                {chartData.map((_, i) => (
+                  <Cell
+                    key={`spending-${i}`}
+                    fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
+                    onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
+                    style={{ outline: 'none' }}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Savings Goal */}
