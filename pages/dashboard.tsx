@@ -316,21 +316,23 @@ export default function Dashboard() {
         realisticMonthlyData[selectedMonthIndex]?.month &&
         categoryData[realisticMonthlyData[selectedMonthIndex].month] && (
           <div className="mt-8">
-            <h2 className="text-lg font-semibold mb-2">
-              📂 Spending Breakdown for {realisticMonthlyData[selectedMonthIndex].month}
+            <h2 className="text-lg font-semibold mb-4">
+              📂 Spending Breakdown for {new Date(`${realisticMonthlyData[selectedMonthIndex].month} 1, 2024`).toLocaleString('en-US', { month: 'long' })}
             </h2>
-            <div className="bg-white rounded-xl shadow p-4 space-y-2">
+            <div className="bg-white rounded-xl shadow p-4 divide-y">
               {(() => {
                 const month = realisticMonthlyData[selectedMonthIndex].month
                 const items = categoryData[month]
                 const total = items.reduce((sum, item) => sum + item.amount, 0)
 
+                const prevMonth = realisticMonthlyData[selectedMonthIndex - 1]?.month ?? null
+                const prevItems = prevMonth ? categoryData[prevMonth] || [] : []
+
                 return items.map((item, i) => {
                   const percent = ((item.amount / total) * 100).toFixed(1)
-                  const prevMonth = realisticMonthlyData[selectedMonthIndex - 1]?.month
-                  const prevItems = prevMonth ? categoryData[prevMonth] || [] : []
                   const prevAmount = prevItems.find(p => p.category === item.category)?.amount
                   const change = prevAmount !== undefined ? item.amount - prevAmount : null
+
                   const changeText = change !== null
                     ? change > 0
                       ? `↑ $${change.toLocaleString()}`
@@ -339,29 +341,32 @@ export default function Dashboard() {
                       : '—'
                     : null
 
+                  const changeColor =
+                    typeof change === 'number'
+                      ? change > 0
+                        ? 'text-red-500'
+                        : change < 0
+                        ? 'text-green-600'
+                        : 'text-gray-400'
+                      : 'text-gray-400'
+
                   return (
-                    <div key={i} className="flex justify-between items-center">
-                      <span>
-                        {item.note ? `${item.category} ${item.note}` : item.category}
-                      </span>
-                      <div className="text-right">
-                        <div className="font-medium">
-                          ${item.amount.toLocaleString()}{' '}
-                          <span className="text-sm text-gray-500">({percent}%)</span>
-                        </div>
-                        {changeText && change !== null && (
-                          <div
-                            className={`text-sm ${
-                              change > 0
-                                ? 'text-red-500'
-                                : change < 0
-                                ? 'text-green-600'
-                                : 'text-gray-400'
-                            }`}
-                          >
+                    <div key={i} className="flex justify-between items-start py-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-800">
+                          {item.note ? `${item.category} ${item.note}` : item.category}
+                        </span>
+                        {changeText && change !== null && prevMonth && (
+                          <span className={`text-sm ${changeColor}`}>
                             {changeText} vs {prevMonth}
-                          </div>
+                          </span>
                         )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-gray-900 font-semibold">
+                          ${item.amount.toLocaleString()}
+                        </div>
+                        <div className="text-sm text-gray-500">{percent}%</div>
                       </div>
                     </div>
                   )
