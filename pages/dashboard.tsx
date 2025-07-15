@@ -238,9 +238,9 @@ export default function Dashboard() {
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8 ring-transparent">
+      <div className="bg-white rounded-xl shadow p-6 mb-8 focus:outline-none focus:ring-0">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
-        <ResponsiveContainer width="100%" height={300} style={{ outline: 'none' }}>
+        <ResponsiveContainer width="100%" height={300} className="focus:outline-none focus:ring-0">
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
