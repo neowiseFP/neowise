@@ -9,8 +9,8 @@ export default function Login() {
   const handleLogin = async () => {
     const redirectUrl =
       process.env.NODE_ENV === 'development'
-        ? 'http://localhost:3000/auth/callback'
-        : 'https://neowise.io/auth/callback'
+        ? 'http://localhost:3000/dashboard/cashflow'
+        : 'https://www.neowise.io/dashboard/cashflow'
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
