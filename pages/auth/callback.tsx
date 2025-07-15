@@ -16,7 +16,7 @@ export default function AuthCallback() {
       } = await supabase.auth.getSession()
 
       if (session) {
-        router.replace('/dashboard')
+        router.replace('/dashboard/cashflow')
       } else {
         // Try to exchange code from URL fragment
         const {
