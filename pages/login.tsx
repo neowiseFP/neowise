@@ -15,7 +15,7 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: redirectUrl,
+        emailRedirectTo: 'https://www.neowise.io/dashboard/cashflow',
         shouldCreateUser: true,
       },
     })
