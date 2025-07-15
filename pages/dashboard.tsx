@@ -329,62 +329,64 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Category Breakdown (Monthly View) */}
-      {['monthly', 'ytd'].includes(viewMode) && categoryData[realisticMonthlyData[selectedMonthIndex].month] && (
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-2">
-            📂 Spending Breakdown for {realisticMonthlyData[selectedMonthIndex].month}
-          </h2>
-          <div className="bg-white rounded-xl shadow p-4 space-y-2">
-            {(() => {
-              const month = realisticMonthlyData[selectedMonthIndex].month
-              const items = categoryData[month]
-              const total = items.reduce((sum, item) => sum + item.amount, 0)
+      {/* Category Breakdown (Monthly + YTD View) */}
+      {['monthly', 'ytd'].includes(viewMode) &&
+        realisticMonthlyData[selectedMonthIndex]?.month &&
+        categoryData[realisticMonthlyData[selectedMonthIndex].month] && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold mb-2">
+              📂 Spending Breakdown for {realisticMonthlyData[selectedMonthIndex].month}
+            </h2>
+            <div className="bg-white rounded-xl shadow p-4 space-y-2">
+              {(() => {
+                const month = realisticMonthlyData[selectedMonthIndex].month
+                const items = categoryData[month]
+                const total = items.reduce((sum, item) => sum + item.amount, 0)
 
-              return items.map((item, i) => {
-                const percent = ((item.amount / total) * 100).toFixed(1)
-                const prevMonth = realisticMonthlyData[selectedMonthIndex - 1]?.month
-                const prevItems = categoryData[prevMonth] || []
-                const prevAmount = prevItems.find(p => p.category === item.category)?.amount
-                const change = prevAmount !== undefined ? item.amount - prevAmount : null
-                const changeText = change !== null
-                  ? change > 0
-                    ? `↑ $${change.toLocaleString()}`
-                    : change < 0
-                    ? `↓ $${Math.abs(change).toLocaleString()}`
-                    : '—'
-                  : null
+                return items.map((item, i) => {
+                  const percent = ((item.amount / total) * 100).toFixed(1)
+                  const prevMonth = realisticMonthlyData[selectedMonthIndex - 1]?.month
+                  const prevItems = prevMonth ? categoryData[prevMonth] || [] : []
+                  const prevAmount = prevItems.find(p => p.category === item.category)?.amount
+                  const change = prevAmount !== undefined ? item.amount - prevAmount : null
+                  const changeText = change !== null
+                    ? change > 0
+                      ? `↑ $${change.toLocaleString()}`
+                      : change < 0
+                      ? `↓ $${Math.abs(change).toLocaleString()}`
+                      : '—'
+                    : null
 
-                return (
-                  <div key={i} className="flex justify-between items-center">
-                    <span>
-                      {item.note ? `${item.category} ${item.note}` : item.category}
-                    </span>
-                    <div className="text-right">
-                      <div className="font-medium">
-                        ${item.amount.toLocaleString()}{' '}
-                        <span className="text-sm text-gray-500">({percent}%)</span>
-                      </div>
-                      {changeText && change !== null && (
-                        <div
-                          className={`text-sm ${
-                            change > 0
-                              ? 'text-red-500'
-                              : change < 0
-                              ? 'text-green-600'
-                              : 'text-gray-400'
-                          }`}
-                        >
-                          {changeText} vs {prevMonth}
+                  return (
+                    <div key={i} className="flex justify-between items-center">
+                      <span>
+                        {item.note ? `${item.category} ${item.note}` : item.category}
+                      </span>
+                      <div className="text-right">
+                        <div className="font-medium">
+                          ${item.amount.toLocaleString()}{' '}
+                          <span className="text-sm text-gray-500">({percent}%)</span>
                         </div>
-                      )}
+                        {changeText && change !== null && (
+                          <div
+                            className={`text-sm ${
+                              change > 0
+                                ? 'text-red-500'
+                                : change < 0
+                                ? 'text-green-600'
+                                : 'text-gray-400'
+                            }`}
+                          >
+                            {changeText} vs {prevMonth}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })
-            })()}
+                  )
+                })
+              })()}
+            </div>
           </div>
-        </div>
       )}
     </div>
   )
