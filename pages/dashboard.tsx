@@ -238,7 +238,7 @@ export default function Dashboard() {
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8 focus:outline-none focus:ring-0">
+      <div className="bg-white rounded-xl shadow p-6 mb-8 ring-transparent">
         <h2 className="font-semibold text-lg mb-4">💵 Cash Flow</h2>
         <ResponsiveContainer width="100%" height={300} style={{ outline: 'none' }}>
           <BarChart data={chartData}>
@@ -250,8 +250,8 @@ export default function Dashboard() {
               {chartData.map((_, i) => (
                 <Cell
                   key={`income-${i}`}
-                  fill={viewMode === 'monthly' && i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
-                  onClick={viewMode === 'monthly' ? () => handleBarClick(i) : undefined}
+                  fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#16a34a' : '#22C55E'}
+                  onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
                   style={{ outline: 'none' }}
                 />
               ))}
@@ -260,8 +260,8 @@ export default function Dashboard() {
               {chartData.map((_, i) => (
                 <Cell
                   key={`spending-${i}`}
-                  fill={viewMode === 'monthly' && i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
-                  onClick={viewMode === 'monthly' ? () => handleBarClick(i) : undefined}
+                  fill={['monthly', 'ytd'].includes(viewMode) && i === selectedMonthIndex ? '#b91c1c' : '#EF4444'}
+                  onClick={['monthly', 'ytd'].includes(viewMode) ? () => handleBarClick(i) : undefined}
                   style={{ outline: 'none' }}
                 />
               ))}
@@ -291,7 +291,7 @@ export default function Dashboard() {
       {/* Smart Insights */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
-        {viewMode === 'monthly' &&
+        {['monthly', 'ytd'].includes(viewMode) &&
           generateInsights(selectedMonthIndex).map((text, i) => (
             <div key={i} className="bg-white rounded-xl shadow p-4">
               <p className="text-gray-700">{text}</p>
@@ -314,9 +314,11 @@ export default function Dashboard() {
       </div>
 
       {/* Category Breakdown (Monthly View) */}
-      {viewMode === 'monthly' && categoryData[realisticMonthlyData[selectedMonthIndex].month] && (
+      {['monthly', 'ytd'].includes(viewMode) && categoryData[realisticMonthlyData[selectedMonthIndex].month] && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-2">📂 Spending Breakdown</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            📂 Spending Breakdown for {realisticMonthlyData[selectedMonthIndex].month}
+          </h2>
           <div className="bg-white rounded-xl shadow p-4 space-y-2">
             {(() => {
               const month = realisticMonthlyData[selectedMonthIndex].month
@@ -344,17 +346,17 @@ export default function Dashboard() {
                     </span>
                     <div className="text-right">
                       <div className="font-medium">
-                        ${item.amount.toLocaleString()}{" "}
+                        ${item.amount.toLocaleString()}{' '}
                         <span className="text-sm text-gray-500">({percent}%)</span>
                       </div>
                       {changeText && change !== null && (
                         <div
                           className={`text-sm ${
                             change > 0
-                              ? "text-red-500"
+                              ? 'text-red-500'
                               : change < 0
-                              ? "text-green-600"
-                              : "text-gray-400"
+                              ? 'text-green-600'
+                              : 'text-gray-400'
                           }`}
                         >
                           {changeText} vs {prevMonth}
