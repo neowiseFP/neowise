@@ -127,7 +127,7 @@ export default function Dashboard() {
 
   const chartData = selectedRange.map((m, i) => ({
     ...m,
-    name: m.month,
+    name: m.month ?? m.week ?? `Item ${i + 1}`,
     index: i,
   }))
 
