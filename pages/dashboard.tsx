@@ -286,24 +286,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Savings Goal */}
-      <div className="bg-white rounded-xl shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-2">🎯 Savings Goal</h2>
-        <p className="text-gray-800 mb-2">
-          You've saved <strong>${ytdSaved.toLocaleString()}</strong> toward your <strong>${goalAmount.toLocaleString()}</strong> goal — <span className="text-green-600 font-semibold">{goalPercent}% complete</span>
-        </p>
-        <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
-          <div className="h-full bg-green-500 transition-all duration-300 ease-in-out" style={{ width: `${goalPercent}%` }} />
-        </div>
-        <label className="block text-sm text-gray-600 mb-1">Update goal:</label>
-        <input
-          type="number"
-          className="border px-3 py-1 rounded w-48"
-          value={goalAmount}
-          onChange={(e) => setGoalAmount(Number(e.target.value))}
-        />
-      </div>
-
       {/* Smart Insights */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">📌 Smart Insights</h2>
