@@ -242,7 +242,7 @@ export default function Home() {
         <meta name="twitter:image" content="https://neowise.io/images/neo-preview-v2.png" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-white text-gray-900 font-sans">
+      <div className="min-h-screen bg-white text-gray-900 font-sans">
         <Navbar />
 
         <div className="p-4">
@@ -254,12 +254,6 @@ export default function Home() {
             Your Financial Life: Smart insights, track your progress, and make confident decisions.
           </p>
         </header>
-
-        <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow p-6 w-full max-w-xl text-center mx-auto mb-6">
-          <p className="text-gray-800">
-            Hi, I’m <strong>Neo</strong> — your financial AI assistant, trained by a human CFP®. Ask me anything to get started.
-          </p>
-        </div>
         
           <div
             ref={chatRef}
