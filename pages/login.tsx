@@ -12,10 +12,12 @@ export default function Login() {
         ? 'http://localhost:3000/dashboard/cashflow'
         : 'https://www.neowise.io/dashboard/cashflow'
 
+    console.log('Redirecting to:', redirectUrl)
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: 'https://www.neowise.io/dashboard/cashflow',
+        emailRedirectTo: redirectUrl,
         shouldCreateUser: true,
       },
     })
