@@ -83,9 +83,9 @@ export default function Dashboard() {
         : `📉 Your savings rate dropped to ${rateCurrent}% (was ${ratePrev}%).`)
     }
 
-    const travel = categoryData[current.month]?.find(c => c.category === 'Travel')
-    if (travel && travel.amount > 2000) {
-      insights.push(`✈️ Travel spending was high at $${travel.amount.toLocaleString()} — consider budgeting next month.`)
+    let travel
+    if (current.month) {
+      travel = categoryData[current.month]?.find(c => c.category === 'Travel')
     }
 
     return insights
