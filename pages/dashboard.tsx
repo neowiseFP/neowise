@@ -101,7 +101,7 @@ export default function Dashboard() {
   const selectedRange =
     viewMode === 'custom' ? getRange(customStart, customEnd)
     : viewMode === '3month' ? realisticMonthlyData.slice(-3)
-    : viewMode === 'weekly' ? realisticMonthlyData.slice(-4)
+    : viewMode === 'weekly' ? realisticMonthlyData.slice(-1)
     : viewMode === 'ytd' ? realisticMonthlyData
     : viewMode === 'annual' ? realisticMonthlyData
     : [realisticMonthlyData[selectedMonthIndex]]

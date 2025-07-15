@@ -18,3 +18,8 @@
 .dot-animation.delay-400 {
   animation-delay: 0.4s;
 }
+
+/* ✅ Fix: Prevent blue focus outline on Recharts wrapper */
+.recharts-wrapper:focus {
+  outline: none !important;
+}
