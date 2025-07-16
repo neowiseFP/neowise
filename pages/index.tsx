@@ -253,7 +253,7 @@ export default function Home() {
                   Neo — Your Financial AI Assistant
                </h1>
              <p className="text-gray-600 text-base sm:text-lg">
-               Your Financial Life: Smart insights, track your progress, and make confident decisions.
+               Gain insights. Track progress. Plan smart.
               </p>
             </header>
         
