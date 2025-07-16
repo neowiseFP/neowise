@@ -245,15 +245,17 @@ export default function Home() {
       <div className="min-h-screen bg-white text-gray-900 font-sans">
         <Navbar />
 
-        <div className="p-4">
-        <header className="text-center space-y-3 mb-6">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
-            Neo — Your Financial AI Assistant
-          </h1>
-          <p className="text-gray-600 text-base sm:text-lg">
-            Your Financial Life: Smart insights, track your progress, and make confident decisions.
-          </p>
-        </header>
+        <div className="bg-gray-50 min-h-screen">
+          <div className="max-w-3xl mx-auto px-4 py-12">
+            <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+             <header className="text-center space-y-3 mb-6">
+               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
+                  Neo — Your Financial AI Assistant
+               </h1>
+             <p className="text-gray-600 text-base sm:text-lg">
+               Your Financial Life: Smart insights, track your progress, and make confident decisions.
+              </p>
+            </header>
         
           <div
             ref={chatRef}
@@ -453,6 +455,8 @@ export default function Home() {
           </Modal>
         )}
       </div>
+     </div>
+     </div>
     </>
   );
 }
