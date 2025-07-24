@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import Navbar from "@/components/Navbar";
 import { MessageCircle, Calculator, UserCheck } from "lucide-react";
 import { extractTickerFrom } from "@/utils/extractTicker";
+import StockChart from "@/components/StockChart";
 
 type Message = {
   role: "user" | "assistant" | "system";
