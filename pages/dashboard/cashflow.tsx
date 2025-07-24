@@ -28,14 +28,11 @@ const fullMonthName = (abbr: string) =>
   new Date(`${abbr} 1, 2024`).toLocaleString('en-US', { month: 'long' })
 
 export default function Dashboard() {
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('monthly')
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number>(5)
   const [customStart, setCustomStart] = useState<number>(0)
   const [customEnd, setCustomEnd] = useState<number>(5)
   const [goalAmount, setGoalAmount] = useState<number>(20000)
-  const router = useRouter()
 
   const realisticMonthlyData: DataPoint[] = [
     { month: 'Jan', income: 7400, spending: 5200 },
@@ -141,7 +138,6 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
           <h1 className="text-2xl font-bold">👋 Welcome to your Dashboard</h1>
-          <p className="text-gray-600">You’re viewing the public dashboard</p>
         </div>
         <div className="space-x-2">
           {['weekly', 'monthly', '3month', 'ytd', 'annual', 'custom'].map((mode) => (
