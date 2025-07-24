@@ -265,6 +265,7 @@ export default function Home() {
           >
             {messages.map((m, i) => {
               const ticker = m.role === "assistant" ? extractTickerFrom(m.content) : null;
+              if (ticker) console.log("✅ Ticker detected:", ticker);
 
               return (
                 <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
