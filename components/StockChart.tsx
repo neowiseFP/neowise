@@ -11,19 +11,20 @@ type QuoteData = {
   currency: string
 }
 
-export default function StockChart({ symbol = 'NASDAQ:AAPL' }: { symbol: string }) {
+export default function StockChart({ symbol }: { symbol: string }) {
+  const fullSymbol = symbol.startsWith('NASDAQ:') ? symbol : `NASDAQ:${symbol}`
   const [chartId, setChartId] = useState('')
   const [quote, setQuote] = useState<QuoteData | null>(null)
 
   useEffect(() => {
-    const id = `tv_chart_${symbol.replace(/[^a-zA-Z0-9]/g, '')}`
+    const id = `tv_chart_${fullSymbol.replace(/[^a-zA-Z0-9]/g, '')}`
     setChartId(id)
 
     if (typeof window !== 'undefined' && (window as any).TradingView) {
       new (window as any).TradingView.widget({
         width: '100%',
         height: 400,
-        symbol,
+        symbol: fullSymbol,
         interval: 'D',
         timezone: 'Etc/UTC',
         theme: 'light',
@@ -37,13 +38,13 @@ export default function StockChart({ symbol = 'NASDAQ:AAPL' }: { symbol: string 
         container_id: id,
       })
     }
-  }, [symbol])
+  }, [fullSymbol])
 
   useEffect(() => {
     const fetchQuote = async () => {
       try {
         const res = await fetch(
-          `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol.replace(
+          `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${fullSymbol.replace(
             'NASDAQ:',
             ''
           )}?modules=price`
@@ -53,7 +54,7 @@ export default function StockChart({ symbol = 'NASDAQ:AAPL' }: { symbol: string 
         if (!priceData) return
 
         setQuote({
-          name: priceData.longName || priceData.shortName || symbol,
+          name: priceData.longName || priceData.shortName || fullSymbol,
           price: priceData.regularMarketPrice?.raw,
           marketCap: priceData.marketCap?.raw,
           currency: priceData.currency || 'USD',
@@ -64,7 +65,7 @@ export default function StockChart({ symbol = 'NASDAQ:AAPL' }: { symbol: string 
     }
 
     fetchQuote()
-  }, [symbol])
+  }, [fullSymbol])
 
   return (
     <div className="w-full mb-4">
@@ -73,7 +74,7 @@ export default function StockChart({ symbol = 'NASDAQ:AAPL' }: { symbol: string 
       {quote && (
         <StockSummary
           name={quote.name}
-          symbol={symbol.replace('NASDAQ:', '')}
+          symbol={fullSymbol.replace('NASDAQ:', '')}
           price={quote.price}
           marketCap={quote.marketCap}
           currency={quote.currency}

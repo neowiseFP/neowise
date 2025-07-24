@@ -6,6 +6,7 @@ import { MessageCircle, Calculator, UserCheck } from "lucide-react";
 import StockChart from "@/components/StockChart";
 import { resolveTicker } from "@/utils/resolveTicker";
 import StockSummary from "@/components/StockSummary";
+import ReactMarkdown from 'react-markdown'
 
 type Message = {
   role: "user" | "assistant" | "system";
@@ -301,7 +302,14 @@ export default function Home() {
                         <StockChart symbol={`NASDAQ:${tickers[i]}`} />
                       </div>
                     )}
-                    {m.content}
+
+                    {m.role === "assistant" ? (
+                      <div className="prose prose-sm max-w-none text-left">
+                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      m.content
+                    )}
                   </div>
 
                   {m.role === "assistant" && m.content.length > 99 && (
