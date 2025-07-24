@@ -134,29 +134,6 @@ export default function Dashboard() {
     index: i,
   }))
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        setUser(session.user)
-        setLoading(false)
-        if (window.location.hash) window.history.replaceState({}, document.title, window.location.pathname)
-      } else {
-        setTimeout(async () => {
-          const { data: retry } = await supabase.auth.getSession()
-          if (retry.session) {
-            setUser(retry.session.user)
-            setLoading(false)
-            if (window.location.hash) window.history.replaceState({}, document.title, window.location.pathname)
-          } else router.push('/login')
-        }, 1000)
-      }
-    }
-    checkSession()
-  }, [router])
-
-  if (loading) return <p className="p-8 text-center">Loading...</p>
-
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
       <Navbar />
@@ -164,18 +141,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
           <h1 className="text-2xl font-bold">👋 Welcome to your Dashboard</h1>
-          <p className="text-gray-600">
-            Logged in as: <strong>{user?.email}</strong>
-            <button
-              onClick={async () => {
-                await supabase.auth.signOut()
-                router.push('/login')
-              }}
-              className="ml-4 px-3 py-1 rounded-md text-sm font-medium border bg-white text-black hover:bg-gray-100"
-            >
-              Log out
-            </button>
-          </p>
+          <p className="text-gray-600">You’re viewing the public dashboard</p>
         </div>
         <div className="space-x-2">
           {['weekly', 'monthly', '3month', 'ytd', 'annual', 'custom'].map((mode) => (
