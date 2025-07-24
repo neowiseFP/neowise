@@ -1,7 +1,7 @@
 'use client'
 
-import Script from 'next/script'
 import { useEffect, useState } from 'react'
+import Script from 'next/script'
 import StockSummary from '@/components/StockSummary'
 
 type QuoteData = {
@@ -19,32 +19,28 @@ export default function StockChart({ symbol }: { symbol: string }) {
   useEffect(() => {
     const id = `tv_chart_${fullSymbol.replace(/[^a-zA-Z0-9]/g, '')}`
     setChartId(id)
-
-    const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && (window as any).TradingView) {
-        clearInterval(interval)
-
-        new (window as any).TradingView.widget({
-          width: '100%',
-          height: 400,
-          symbol: fullSymbol,
-          interval: 'D',
-          timezone: 'Etc/UTC',
-          theme: 'light',
-          style: '1',
-          locale: 'en',
-          toolbar_bg: '#f1f3f6',
-          enable_publishing: false,
-          withdateranges: true,
-          hide_side_toolbar: false,
-          allow_symbol_change: false,
-          container_id: id,
-        })
-      }
-    }, 200) // retry every 200ms
-
-    return () => clearInterval(interval)
   }, [fullSymbol])
+
+  const createWidget = () => {
+    if (typeof window !== 'undefined' && (window as any).TradingView) {
+      new (window as any).TradingView.widget({
+        width: '100%',
+        height: 400,
+        symbol: fullSymbol,
+        interval: 'D',
+        timezone: 'Etc/UTC',
+        theme: 'light',
+        style: '1',
+        locale: 'en',
+        toolbar_bg: '#f1f3f6',
+        enable_publishing: false,
+        withdateranges: true,
+        hide_side_toolbar: false,
+        allow_symbol_change: false,
+        container_id: chartId,
+      })
+    }
+  }
 
   useEffect(() => {
     const fetchQuote = async () => {
@@ -75,8 +71,12 @@ export default function StockChart({ symbol }: { symbol: string }) {
 
   return (
     <div className="w-full mb-4">
-      <Script src="https://s3.tradingview.com/tv.js" strategy="afterInteractive" />
       <div id={chartId} className="mb-4" />
+      <Script
+        src="https://s3.tradingview.com/tv.js"
+        strategy="afterInteractive"
+        onLoad={createWidget}
+      />
       {quote && (
         <StockSummary
           name={quote.name}
