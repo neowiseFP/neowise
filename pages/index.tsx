@@ -3,8 +3,9 @@ import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
 import Navbar from "@/components/Navbar";
 import { MessageCircle, Calculator, UserCheck } from "lucide-react";
-import { extractTickerFrom } from "@/utils/extractTicker";
 import StockChart from "@/components/StockChart";
+import { resolveTicker } from "@/utils/resolveTicker";
+import StockSummary from "@/components/StockSummary";
 
 type Message = {
   role: "user" | "assistant" | "system";
@@ -40,6 +41,7 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [tickers, setTickers] = useState<{ [index: number]: string | null }>({});
 
   const categories = {
     "Getting Started": [
@@ -90,6 +92,25 @@ export default function Home() {
       setScrollOnNextMessage(false);
     }
   }, [messages, loading]);
+
+  useEffect(() => {
+    const resolveAll = async () => {
+      const newMap: { [index: number]: string | null } = {};
+
+      await Promise.all(
+        messages.map(async (m, i) => {
+          if (m.role === "assistant") {
+            const symbol = await resolveTicker(m.content);
+            newMap[i] = symbol;
+          }
+        })
+      );
+
+      setTickers(newMap);
+    };
+
+    resolveAll();
+  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,8 +285,6 @@ export default function Home() {
             className="space-y-4 mb-4 min-h-[50vh] max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
           >
             {messages.map((m, i) => {
-              const ticker = m.role === "assistant" ? extractTickerFrom(m.content) : null;
-              if (ticker) console.log("✅ Ticker detected:", ticker);
 
               return (
                 <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
@@ -277,9 +296,9 @@ export default function Home() {
                     }`}
                   >
                     {/* Show chart if assistant reply includes a ticker */}
-                    {m.role === "assistant" && ticker && (
+                    {m.role === "assistant" && tickers[i] && (
                       <div className="mb-2">
-                        <StockChart symbol={`NASDAQ:${ticker}`} />
+                        <StockChart symbol={`NASDAQ:${tickers[i]}`} />
                       </div>
                     )}
                     {m.content}
