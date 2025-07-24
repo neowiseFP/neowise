@@ -3,6 +3,7 @@ import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
 import Navbar from "@/components/Navbar";
 import { MessageCircle, Calculator, UserCheck } from "lucide-react";
+import { extractTickerFrom } from "@/utils/extractTicker";
 
 type Message = {
   role: "user" | "assistant" | "system";
@@ -261,48 +262,58 @@ export default function Home() {
             ref={chatRef}
             className="space-y-4 mb-4 min-h-[50vh] max-h-[75vh] md:max-h-[60vh] overflow-y-auto"
           >
-            {messages.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                <span
-                  className={`inline-block px-4 py-2 rounded-lg max-w-[85%] whitespace-pre-wrap text-left ${
-                    m.role === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  {m.content}
-                </span>
+            {messages.map((m, i) => {
+              const ticker = m.role === "assistant" ? extractTickerFrom(m.content) : null;
 
-                {m.role === "assistant" && m.content.length > 99 && (
-                  <div className="text-sm mt-1">
-                    {["up", "neutral", "down"].map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => {
-                          setFeedback({ ...feedback, [i]: type });
-                          fetch("/api/feedback-log", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              messageIndex: i,
-                              feedback: type,
-                              message: messages[i]?.content,
-                              timestamp: new Date().toISOString(),
-                              userId,
-                            }),
-                          });
-                        }}
-                        className={`${
-                          type === "neutral" ? "mx-2" : ""
-                        } ${feedback[i] === type ? "text-xl scale-110" : "opacity-50"}`}
-                      >
-                        {type === "up" ? "👍" : type === "neutral" ? "🤔" : "👎"}
-                      </button>
-                    ))}
+              return (
+                <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
+                  <div
+                    className={`inline-block px-4 py-2 rounded-lg max-w-[85%] whitespace-pre-wrap text-left ${
+                      m.role === "user"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-800"
+                    }`}
+                  >
+                    {/* Show chart if assistant reply includes a ticker */}
+                    {m.role === "assistant" && ticker && (
+                      <div className="mb-2">
+                        <StockChart symbol={`NASDAQ:${ticker}`} />
+                      </div>
+                    )}
+                    {m.content}
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {m.role === "assistant" && m.content.length > 99 && (
+                    <div className="text-sm mt-1">
+                      {["up", "neutral", "down"].map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => {
+                            setFeedback({ ...feedback, [i]: type });
+                            fetch("/api/feedback-log", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                messageIndex: i,
+                                feedback: type,
+                                message: messages[i]?.content,
+                                timestamp: new Date().toISOString(),
+                                userId,
+                              }),
+                            });
+                          }}
+                          className={`${
+                            type === "neutral" ? "mx-2" : ""
+                          } ${feedback[i] === type ? "text-xl scale-110" : "opacity-50"}`}
+                        >
+                          {type === "up" ? "👍" : type === "neutral" ? "🤔" : "👎"}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}            
 
             {loading && (
               <div className="flex items-center gap-1 text-sm text-gray-500 italic">
