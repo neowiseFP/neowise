@@ -16,11 +16,13 @@ export default function StockChart({ symbol }: { symbol: string }) {
   const [chartId, setChartId] = useState('')
   const [quote, setQuote] = useState<QuoteData | null>(null)
 
-  useEffect(() => {
-    const id = `tv_chart_${fullSymbol.replace(/[^a-zA-Z0-9]/g, '')}`
-    setChartId(id)
+useEffect(() => {
+  const id = `tv_chart_${fullSymbol.replace(/[^a-zA-Z0-9]/g, '')}`
+  setChartId(id)
 
+  const interval = setInterval(() => {
     if (typeof window !== 'undefined' && (window as any).TradingView) {
+      clearInterval(interval)
       new (window as any).TradingView.widget({
         width: '100%',
         height: 400,
@@ -38,7 +40,10 @@ export default function StockChart({ symbol }: { symbol: string }) {
         container_id: id,
       })
     }
-  }, [fullSymbol])
+  }, 100)
+
+  return () => clearInterval(interval)
+}, [fullSymbol])
 
   useEffect(() => {
     const fetchQuote = async () => {
